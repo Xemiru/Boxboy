@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+}
+
+group 'com.github.xemiru.sponge'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'sponge'
+        url = 'https://repo.spongepowered.org/maven'
+    }
+}
+
+dependencies {
+    compile 'org.spongepowered:spongeapi:7.0.0'
+}
+
+task buildTest(type: Jar) {
+    dependsOn compileTestJava
+
+    baseName = "boxboy-test"
+    from sourceSets.main.output.classesDir, sourceSets.test.output.classesDir
+}
