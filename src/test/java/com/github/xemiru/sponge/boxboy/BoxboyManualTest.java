@@ -75,6 +75,15 @@ public class BoxboyManualTest {
                 return CommandResult.success();
             })
             .build(), "hhh");
+
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
+            .description(Text.of("aaa"))
+            .executor((src, args) -> {
+                Sponge.getServer().getOnlinePlayers().forEach(p ->
+                    Sponge.getServer().getBroadcastChannel().send(Text.of(p.getName() + ": " + menu.hasMenuOpen(p))));
+                return CommandResult.success();
+            })
+            .build(), "aaa");
     }
 
 }
