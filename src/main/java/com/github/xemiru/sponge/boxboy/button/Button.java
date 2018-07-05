@@ -5,8 +5,6 @@ import com.github.xemiru.sponge.boxboy.util.ClickContext;
 import com.github.xemiru.sponge.boxboy.util.OfferContext;
 import org.spongepowered.api.item.inventory.ItemStack;
 
-import java.util.Optional;
-
 /**
  * A clickable button in a {@link Menu}, represented by an {@link ItemStack}.
  */

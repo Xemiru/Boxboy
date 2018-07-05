@@ -1,7 +1,6 @@
 package com.github.xemiru.sponge.boxboy.button;
 
 import com.github.xemiru.sponge.boxboy.util.Animation;
-import com.github.xemiru.sponge.boxboy.util.ClickContext;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 /**
