@@ -209,32 +209,44 @@ public class Boxboy {
         return this.playerInvs.containsKey(player.getUniqueId());
     }
 
+    /**
+     * Internal method.
+     *
+     * <p>Retrieve the {@link Menu} currently being viewed by a specific {@link Player}.</p>
+     *
+     * @param player the Player to query
+     * @return the Menu being viewed?
+     */
+    private Optional<Menu> fromPlayer(Player player) {
+        return Optional.ofNullable(Menu.viewerMap.get(player.getUniqueId()));
+    }
+
     // endregion
 
     // region Event listeners
 
     @Listener
     public void onOpen(InteractInventoryEvent.Open e) {
-        e.getCause().first(Player.class).ifPresent(viewer -> {
-            for (Menu menu : Menu.menus) {
-                if (menu.hasMenuOpen(viewer)) {
-                    if (menu instanceof ExtendedMenu) {
-                        this.storePlayer(viewer);
-                        Task.builder().execute(() -> ((ExtendedMenu) menu).updatePlayer(viewer)).submit(this.plugin);
-                    }
-
-                    break;
+        e.getCause().first(Player.class).ifPresent(viewer ->
+            this.fromPlayer(viewer).ifPresent(menu -> {
+                if (menu instanceof ExtendedMenu) {
+                    this.storePlayer(viewer);
+                    Task.builder().execute(() -> ((ExtendedMenu) menu).updatePlayer(viewer)).submit(this.plugin);
                 }
-            }
-        });
+            }));
     }
 
     @Listener
     public void onClose(InteractInventoryEvent.Close e) {
         e.getCause().first(Player.class).ifPresent(viewer -> {
             if (this.hasStoredInventory(viewer))
-                // Restore on the next possible tick.
-                Task.builder().execute(() -> this.restorePlayer(viewer)).submit(this.plugin);
+                Task.builder().execute(() ->
+                    this.restorePlayer(viewer)).submit(this.plugin);
+
+            this.fromPlayer(viewer).ifPresent(menu ->
+                menu.removeViewer(viewer));
+
+            Menu.viewerMap.remove(viewer.getUniqueId());
         });
     }
 
@@ -242,59 +254,58 @@ public class Boxboy {
     public void onLeave(ClientConnectionEvent.Disconnect e) {
         e.getCause().first(Player.class).ifPresent(leaver -> {
             if (this.hasStoredInventory(leaver)) this.restorePlayer(leaver);
+            leaver.getOpenInventory().ifPresent(container -> {
+                Menu.viewerMap.remove(leaver.getUniqueId());
+                this.fromPlayer(leaver).ifPresent(menu -> menu.removeViewer(leaver));
+            });
         });
     }
 
     @Listener
     public void onClick(ClickInventoryEvent e) {
-        e.getCause().first(Player.class).ifPresent(clicker -> {
-            for (Menu menu : Menu.menus) {
-                if (menu.hasMenuOpen(clicker)) {
-                    ClickType type = ClickType.fromEvent(e);
-                    boolean first = true;
-                    boolean cancelled = false;
-                    SlotTransaction exempt = null;
+        e.getCause().first(Player.class).ifPresent(clicker ->
+            this.fromPlayer(clicker).ifPresent(menu -> {
+                ClickType type = ClickType.fromEvent(e);
+                boolean first = true;
+                boolean cancelled = false;
+                SlotTransaction exempt = null;
 
-                    // Check for any tampering with the menu slots.
-                    for (SlotTransaction trans : e.getTransactions()) {
-                        int slot = trans.getSlot().getInventoryProperty(SlotIndex.class)
-                            .map(AbstractInventoryProperty::getValue).orElse(-1);
-                        if (slot >= 0 && slot < menu.getCapacity()) {
-                            // We only want the first transaction since it's the one directly involving the clicked slot.
-                            if (first && type != ClickType.UNKNOWN) {
-                                ItemStack cursorItem = trans.getFinal().createStack();
-                                if (cursorItem.getType() == ItemTypes.AIR) cursorItem = null;
+                // Check for any tampering with the menu slots.
+                for (SlotTransaction trans : e.getTransactions()) {
+                    int slot = trans.getSlot().getInventoryProperty(SlotIndex.class)
+                        .map(AbstractInventoryProperty::getValue).orElse(-1);
+                    if (slot >= 0 && slot < menu.getCapacity()) {
+                        // We only want the first transaction since it's the one directly involving the clicked slot.
+                        if (first && type != ClickType.UNKNOWN) {
+                            ItemStack cursorItem = trans.getFinal().createStack();
+                            if (cursorItem.getType() == ItemTypes.AIR) cursorItem = null;
 
-                                ClickContext context = new ClickContext(type, menu, clicker, cursorItem);
-                                OfferContext oContext = new OfferContext(menu, clicker, cursorItem);
-                                Optional<Button> button = menu.getButton(slot);
+                            ClickContext context = new ClickContext(type, menu, clicker, cursorItem);
+                            OfferContext oContext = new OfferContext(menu, clicker, cursorItem);
+                            Optional<Button> button = menu.getButton(slot);
 
-                                if (button.isPresent()) {
-                                    if (button.get().offer(oContext)) exempt = trans;
-                                    button.get().onClick(context);
+                            if (button.isPresent()) {
+                                if (button.get().offer(oContext)) exempt = trans;
+                                button.get().onClick(context);
 
-                                    context.getNewCursor().ifPresent(it -> e.getCursorTransaction().setCustom(it.createSnapshot()));
-                                }
+                                context.getNewCursor().ifPresent(it -> e.getCursorTransaction().setCustom(it.createSnapshot()));
                             }
-
-                            // If ANY menu slots are messed with, cancel all transactions.
-                            cancelled = true;
-                            break;
                         }
 
-                        first = false;
+                        // If ANY menu slots are messed with, cancel all transactions.
+                        cancelled = true;
+                        break;
                     }
 
-                    if (cancelled) {
-                        for (SlotTransaction it : e.getTransactions()) if (it != exempt) it.setValid(false);
-                        if (exempt == null) e.getCursorTransaction().setValid(false);
-                        if (e.getCursorTransaction().getCustom().isPresent()) e.getCursorTransaction().setValid(true);
-                    }
-
-                    break;
+                    first = false;
                 }
-            }
-        });
+
+                if (cancelled) {
+                    for (SlotTransaction it : e.getTransactions()) if (it != exempt) it.setValid(false);
+                    if (exempt == null) e.getCursorTransaction().setValid(false);
+                    if (e.getCursorTransaction().getCustom().isPresent()) e.getCursorTransaction().setValid(true);
+                }
+            }));
     }
 
     // endregion

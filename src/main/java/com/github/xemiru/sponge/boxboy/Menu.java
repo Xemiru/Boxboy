@@ -8,8 +8,12 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.WeakHashMap;
 
 /**
@@ -19,12 +23,15 @@ import java.util.WeakHashMap;
 public class Menu {
 
     static Set<Menu> menus;
+    static Map<UUID, Menu> viewerMap;
 
     static {
         // Use a weak set to automagically drop unused menu instances.
         // Inventories have a reference to the menus that own them through properties, thus menus should never be
         // disposed as long as their inventory is still in use in some form (e.g. being viewed by a player).
+
         Menu.menus = Collections.newSetFromMap(new WeakHashMap<>());
+        Menu.viewerMap = new HashMap<>();
     }
 
     static void updateInventory(int index, Button[] array, Inventory inv) {
@@ -47,6 +54,7 @@ public class Menu {
         }
     }
 
+    private Set<UUID> viewers;
     private boolean invalidated;
     private Inventory inventory;
     Button[] buttons;
@@ -54,6 +62,8 @@ public class Menu {
     Menu() {
         Menu.menus.add(this);
     }
+
+    // region Internal methods
 
     /**
      * Internal method.
@@ -63,10 +73,24 @@ public class Menu {
      * @param inv the Inventory to use
      */
     void initialize(Inventory inv) {
+        this.viewers = new HashSet<>();
         this.invalidated = false;
         this.inventory = inv;
-        this.buttons = new Button[inventory.capacity()];
+        this.buttons = new Button[inv.capacity()];
     }
+
+    /**
+     * Internal method.
+     *
+     * <p>Removes the provided {@link Player} from the list of this {@link Menu}'s viewers.</p>
+     *
+     * @param player the Player to remove
+     */
+    void removeViewer(Player player) {
+        this.viewers.remove(player.getUniqueId());
+    }
+
+    // endregion
 
     /**
      * Returns whether or not this {@link Menu} is in an invalidated state -- i.e., the menu is waiting to have its
@@ -134,8 +158,17 @@ public class Menu {
      * @param player the Player to query
      * @return if the given Player is currently viewing this Menu
      */
-    public boolean hasMenuOpen(Player player) {
-        return player.getOpenInventory().map(it -> it.containsInventory(this.inventory)).orElse(false);
+    public boolean isViewingMenu(Player player) {
+        return Menu.viewerMap.get(player.getUniqueId()) == this;
+    }
+
+    /**
+     * Returns the set of all {@link UUID}s belonging to {@link Player}s currently viewing this {@link Menu}.
+     *
+     * @return a set of UUIDs belonging to Players currently viewing this Menu
+     */
+    public Set<UUID> getViewers() {
+        return this.viewers;
     }
 
     /**
@@ -144,7 +177,19 @@ public class Menu {
      * @param player the Player to show this Menu to
      */
     public void open(Player player) {
-        player.openInventory(this.inventory);
+        UUID uid = player.getUniqueId();
+        Menu previous = Menu.viewerMap.get(uid);
+
+        // pretend that they're already viewing it so as to validate any viewer checks in an inventory open event
+        Menu.viewerMap.put(uid, this);
+        this.viewers.add(uid);
+
+        if (!player.openInventory(this.inventory).isPresent()) {
+            // reverse the effects of the last two lines if the open actually failed
+            if (previous == null) Menu.viewerMap.remove(uid);
+            else Menu.viewerMap.put(uid, previous);
+            this.viewers.remove(uid);
+        }
     }
 
     /**
