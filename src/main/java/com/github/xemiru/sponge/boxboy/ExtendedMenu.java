@@ -34,7 +34,7 @@ public class ExtendedMenu extends Menu {
      * @param p the Player to update the inventory of
      */
     void updatePlayer(Player p) {
-        if (this.hasMenuOpen(p)) Menu.updateInventory(this.buttons.length - 36, this.buttons, p.getInventory());
+        if (this.isViewingMenu(p)) Menu.updateInventory(this.buttons.length - 36, this.buttons, p.getInventory());
     }
 
 }

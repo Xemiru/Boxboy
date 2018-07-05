@@ -80,7 +80,7 @@ public class BoxboyManualTest {
             .description(Text.of("aaa"))
             .executor((src, args) -> {
                 Sponge.getServer().getOnlinePlayers().forEach(p ->
-                    Sponge.getServer().getBroadcastChannel().send(Text.of(p.getName() + ": " + menu.hasMenuOpen(p))));
+                    Sponge.getServer().getBroadcastChannel().send(Text.of(p.getName() + ": " + menu.isViewingMenu(p))));
                 return CommandResult.success();
             })
             .build(), "aaa");
