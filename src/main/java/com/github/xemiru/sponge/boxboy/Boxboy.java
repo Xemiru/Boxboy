@@ -10,6 +10,7 @@ import org.spongepowered.api.GameState;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
@@ -306,6 +307,16 @@ public class Boxboy {
                     if (e.getCursorTransaction().getCustom().isPresent()) e.getCursorTransaction().setValid(true);
                 }
             }));
+    }
+
+    @Listener
+    public void onPickup(ChangeInventoryEvent.Pickup.Pre e) {
+        e.getCause().first(Player.class).ifPresent(player -> {
+            // Cannot pick up items while viewing an extended menu.
+            // Checking inventory store status instead of checking the currently viewed menu's type will ensure
+            // restoration happens before pickups are allowed again.
+            if (this.hasStoredInventory(player)) e.setCancelled(true);
+        });
     }
 
     // endregion
