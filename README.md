@@ -20,7 +20,17 @@ apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'java'
 ```
 
-The `shadowJar` task can then be configured. It is recommended to relocate the packages so as to not conflict with other versions.
+You can also use the Gradle Plugin syntax instead.
+
+```
+plugins {
+    // ..
+
+    id 'com.github.johnrengelman.shadow' version '2.0.4'
+}
+```
+
+The `shadowJar` task can then be configured. You can choose to relocate the packages to avoid version conflicts with other plugins.
 
 ```gradle
 shadowJar {
@@ -31,7 +41,9 @@ shadowJar {
 The Boxboy dependency can be added.
 
 ```
-Boxboy hasn't been uploaded to Maven Central yet, so this stays empty for now. Check back later.
+dependencies {
+    shadow 'com.github.xemiru.sponge:boxboy:1.0'
+}
 ```
 
 # Usage
