@@ -1,7 +1,11 @@
 plugins {
     id 'java'
+    id 'maven'
+    id 'signing'
+    id 'com.github.hierynomus.license' version '0.14.0'
 }
 
+description 'https://github.com/Xemiru/Boxboy'
 group 'com.github.xemiru.sponge'
 version '1.0-SNAPSHOT'
 
@@ -20,9 +24,75 @@ dependencies {
     compile 'org.spongepowered:spongeapi:7.0.0'
 }
 
+//
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
 task buildTest(type: Jar) {
     dependsOn compileTestJava
 
     baseName = "boxboy-test"
     from sourceSets.main.output.classesDir, sourceSets.test.output.classesDir
+}
+
+//
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: sonaUser, password: sonaPass)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
+                authentication(userName: sonaUser, password: sonaPass)
+            }
+
+            pom.project {
+                name '$project.name'
+                packaging 'jar'
+                description 'https://github.com/Xemiru/Boxboy'
+                url 'https://github.com/Xemiru/Boxboy'
+
+                licenses {
+                    license {
+                        name 'The MIT License'
+                        url 'https://opensource.org/licenses/MIT'
+                    }
+                }
+                
+                scm {
+                    connection 'scm:git:https://github.com/Xemiru/Boxboy.git'
+                    developerConnection 'scm:git:https://github.com/Xemiru/Boxboy.git'
+                    url 'scm:git:https://github.com/Xemiru/Boxboy'
+                }
+                
+                developers {
+                    developer {
+                        id 'xemiru'
+                        name 'Xemiru'
+                        email 'xemiruk@gmail.com'
+                    }
+                }
+            }
+        }
+    }
 }
