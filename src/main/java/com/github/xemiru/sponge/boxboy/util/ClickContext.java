@@ -65,7 +65,7 @@ public class ClickContext {
      * Sets the {@link ItemStack} to be set on the cursor.
      *
      * <p>Setting this to null will not clear the item on the cursor. An ItemStack containing the AIR item type should
-     * instead be provided for a similar effect./p>
+     * instead be provided for a similar effect.</p>
      *
      * @param item the item to set
      */

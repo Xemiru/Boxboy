@@ -21,7 +21,7 @@ public class ToggleButton implements Button {
     /**
      * Creates a new {@link ToggleButton} using the two provided state buttons.
      *
-     * <p>The state button is activated <bold>when becoming the active state</bold> -- {@code stateB}'s
+     * <p>The state button is activated <b>when become the active state</b> -- {@code stateB}'s
      * {@link Button#onClick(ClickContext)} will be activated first.</p>
      *
      * @param stateA the true state of the ToggleButton
@@ -35,7 +35,7 @@ public class ToggleButton implements Button {
     /**
      * Creates a new {@link ToggleButton} using the two provided state buttons.
      *
-     * <p>The state button is activated <bold>when becoming the active state</bold> -- {@code stateB}'s
+     * <p>The state button is activated <b>when becoming the active state</b> -- {@code stateB}'s
      * {@link Button#onClick(ClickContext)} will be activated first if the default state of the ToggleButton is
      * true.</p>
      *
