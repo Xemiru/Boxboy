@@ -24,6 +24,8 @@ dependencies {
     compile 'org.spongepowered:spongeapi:7.0.0'
 }
 
+compileJava.dependsOn licenseFormatMain, licenseFormatTest
+
 //
 
 task javadocJar(type: Jar) {
@@ -44,6 +46,13 @@ task buildTest(type: Jar) {
 }
 
 //
+
+license {
+    header = project.file("LICENSE.txt")
+    mapping {
+        java = "SLASHSTAR_STYLE"
+    }
+}
 
 artifacts {
     archives javadocJar, sourcesJar
