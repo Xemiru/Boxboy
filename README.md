@@ -38,11 +38,11 @@ shadowJar {
 }
 ```
 
-The Boxboy dependency can be added.
+The Boxboy dependency can be added. It must be marked non-transitive so as to disallow the plugin from pulling Boxboy's dependency on the SpongeAPI into your final jar.
 
 ```
 dependencies {
-    shadow 'com.github.xemiru.sponge:boxboy:1.0'
+    compile('com.github.xemiru.sponge:boxboy:1.0') { transitive = false }
 }
 ```
 
