@@ -104,7 +104,7 @@ public class SlotButton implements Button {
 
     @Override
     public ItemStack getRepresentative() {
-        return this.held;
+        return this.held == null ? ItemStack.empty() : this.held;
     }
 
     @Override
