@@ -143,6 +143,14 @@ public class BoxboyManualTest {
                 return CommandResult.success();
             })
             .build(), "aaa");
+
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
+            .description(Text.of("forceclose"))
+            .executor((src, args) -> {
+                Sponge.getServer().getOnlinePlayers().forEach(Player::closeInventory);
+                return CommandResult.success();
+            })
+            .build(), "forceclose");
     }
 
 }
