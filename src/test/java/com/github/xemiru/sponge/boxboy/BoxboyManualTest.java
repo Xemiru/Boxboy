@@ -41,6 +41,7 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 
 import java.util.function.Consumer;
@@ -73,6 +74,11 @@ public class BoxboyManualTest {
         menu.setButton(10, DummyButton.of(ItemStack.of(ItemTypes.STICK, 1)));
         menu.setButton(16, DummyButton.of(ItemStack.of(ItemTypes.STICK, 1)));
 
+        // second menu to be opened by a button
+        Menu menu2 = boxboy.createExtendedMenu(3, Text.of("bleh2"));
+
+        menu2.setButton(0, DummyButton.of(ItemStack.of(ItemTypes.ACACIA_BOAT, 1)));
+
         new MenuPattern()
             .setButton('A', DummyButton.of(ItemStack.of(ItemTypes.STAINED_GLASS_PANE, 1)))
             .setButton('B', ToggleButton.of(
@@ -87,11 +93,17 @@ public class BoxboyManualTest {
                 ActionButton.of(ItemStack.of(ItemTypes.GOLD_INGOT, 1), scrollContext),
                 ActionButton.of(ItemStack.of(ItemTypes.DIAMOND, 1), scrollContext),
                 ActionButton.of(ItemStack.of(ItemTypes.EMERALD, 1), scrollContext)))
-            .setButton('F', ActionButton.of(ItemStack.of(ItemTypes.ITEM_FRAME, 1), context -> menu.open(context.getClicker())))
+            // safe menu open in the event-based implementation
+            .setButton('F', ActionButton.of(ItemStack.of(ItemTypes.ITEM_FRAME, 1), context -> Task.builder()
+                .execute(() -> menu2.open(context.getClicker()))
+                .submit(this)))
+            // unsafe menu open in the event-based implementation
+            .setButton('G', ActionButton.of(ItemStack.of(ItemTypes.SKULL, 1),
+                context -> menu2.open(context.getClicker())))
             .setPattern("AAAAAAAAA",
                 "A  DBC _A",
                 "AAA E AAA",
-                "AAA F AAA",
+                "AA F G AA",
                 "AAA E AAA",
                 "A  DBC  A",
                 "AAAAAAAAA")
