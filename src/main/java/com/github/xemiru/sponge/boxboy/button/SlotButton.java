@@ -89,7 +89,11 @@ public class SlotButton implements Button {
 
         if (this.held != null && this.held.getType() == ItemTypes.AIR) this.held = null;
         boolean same = original == this.held || (original != null && this.held != null && ItemStackComparators.TYPE_SIZE.compare(original, this.held) == 0);
-        if (!same) this.processor.accept(Optional.ofNullable(this.held));
+        if (!same) {
+            this.processor.accept(Optional.ofNullable(this.held));
+            context.getSourceMenu().invalidate();
+        }
+
         return true;
     }
 
