@@ -25,6 +25,7 @@ package com.github.xemiru.sponge.boxboy.util;
 
 import com.github.xemiru.sponge.boxboy.Menu;
 import com.github.xemiru.sponge.boxboy.button.Button;
+import com.google.common.base.Preconditions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -113,6 +114,9 @@ public class MenuPattern {
      * @param forceEmpty if slots occupied by spaces in the pattern should be left alone
      */
     public void apply(Menu menu, boolean forceEmpty) {
+        Preconditions.checkNotNull(menu);
+
+        if (this.pattern == null) throw new IllegalStateException("Pattern has not been set");
         if (this.pattern.length() > menu.getCapacity())
             throw new IllegalArgumentException("Menu too small to contain pattern");
 

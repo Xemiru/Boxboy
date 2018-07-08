@@ -109,6 +109,9 @@ public class Boxboy {
      * @return the Menu instance
      */
     public Menu createMenu(int rows, Text title) {
+        if (rows < 1 || rows > 6)
+            throw new IllegalArgumentException("Rows parameter must be between 1 and 6 (inclusive).");
+
         return this.createMenu(Inventory.builder()
             .of(InventoryArchetypes.CHEST)
             .property(InventoryTitle.of(title))
@@ -138,6 +141,9 @@ public class Boxboy {
      * @return the ExtendedMenu instance
      */
     public ExtendedMenu createExtendedMenu(int rows, Text title) {
+        if (rows < 1 || rows > 6)
+            throw new IllegalArgumentException("Rows parameter must be between 1 and 6 (inclusive).");
+
         return this.createPlayerMenu(Inventory.builder()
             .of(InventoryArchetypes.CHEST)
             .property(InventoryTitle.of(title))

@@ -25,6 +25,7 @@ package com.github.xemiru.sponge.boxboy.util;
 
 import com.github.xemiru.sponge.boxboy.Menu;
 import com.github.xemiru.sponge.boxboy.button.Button;
+import com.google.common.base.Preconditions;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 
@@ -42,6 +43,10 @@ public class ClickContext {
     private ItemStack newCursor;
 
     public ClickContext(ClickType type, Menu sourceMenu, Player clicker, ItemStack cursor) {
+        Preconditions.checkNotNull(type);
+        Preconditions.checkNotNull(sourceMenu);
+        Preconditions.checkNotNull(clicker);
+
         this.type = type;
         this.cursor = cursor;
         this.sourceMenu = sourceMenu;

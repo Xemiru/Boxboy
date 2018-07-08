@@ -25,6 +25,7 @@ package com.github.xemiru.sponge.boxboy.button;
 
 import com.github.xemiru.sponge.boxboy.util.ClickContext;
 import com.github.xemiru.sponge.boxboy.util.OfferContext;
+import com.google.common.base.Preconditions;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
@@ -36,6 +37,8 @@ import java.util.function.Consumer;
  * A {@link Button} implementation that pretends to be a normal inventory slot.
  */
 public class SlotButton implements Button {
+
+    private static final Consumer<Optional<ItemStack>> DO_NOTHING = item -> {};
 
     private ItemStack held;
     private Consumer<Optional<ItemStack>> processor;
@@ -49,7 +52,7 @@ public class SlotButton implements Button {
      * @return a new SlotButton
      */
     public static SlotButton of() {
-        return SlotButton.of(null);
+        return SlotButton.of(DO_NOTHING);
     }
 
     /**
@@ -62,6 +65,7 @@ public class SlotButton implements Button {
      * @return a new SlotButton
      */
     public static SlotButton of(Consumer<Optional<ItemStack>> processor) {
+        Preconditions.checkNotNull(processor);
         SlotButton btn = new SlotButton();
 
         btn.held = null;
@@ -85,7 +89,7 @@ public class SlotButton implements Button {
 
         if (this.held != null && this.held.getType() == ItemTypes.AIR) this.held = null;
         boolean same = original == this.held || (original != null && this.held != null && ItemStackComparators.TYPE_SIZE.compare(original, this.held) == 0);
-        if (this.processor != null && !same) this.processor.accept(Optional.ofNullable(this.held));
+        if (!same) this.processor.accept(Optional.ofNullable(this.held));
         return true;
     }
 
