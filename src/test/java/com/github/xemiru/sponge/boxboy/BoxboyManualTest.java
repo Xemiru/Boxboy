@@ -106,6 +106,24 @@ public class BoxboyManualTest {
             .build(), "hhh");
 
         Sponge.getCommandManager().register(this, CommandSpec.builder()
+            .description(Text.of("create"))
+            .executor((src, args) -> {
+                if (src instanceof Player) boxboy.createMenu(3, Text.of("throwaway")).open((Player) src);
+                return CommandResult.success();
+            })
+            .build(), "create");
+
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
+            .description(Text.of("manualgc"))
+            .executor((src, args) -> {
+                src.sendMessage(Text.of(String.format("There are %s menus active.", Menu.menus.size())));
+                System.gc();
+
+                src.sendMessage(Text.of(String.format("GC complete. There are %s menus active.", Menu.menus.size())));
+                return CommandResult.success();
+            }).build(), "manualgc");
+
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
             .description(Text.of("aaa"))
             .executor((src, args) -> {
                 Sponge.getServer().getOnlinePlayers().forEach(p ->
