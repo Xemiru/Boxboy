@@ -69,8 +69,9 @@ public class MenuPattern {
      * method as this method verifies the validity of all characters within the provided String.</p>
      *
      * <p>Each string passed to this method will be concatenated together as one pattern string. Newline characters (\r,
-     * \n) are ignored. Spaces are considered empty slots. All other characters are valid only if registered through the
-     * setButton method.</p>
+     * \n) are ignored. Spaces will do nothing to the slot at the character's position. Underscore characters (_) will
+     * forcibly remove the button in the slot at the character's position. All other characters are valid only if
+     * registered through the setButton method.</p>
      *
      * @param pattern the pattern to set
      * @return this MenuPattern, for chaining
@@ -83,7 +84,7 @@ public class MenuPattern {
         // Verify the pattern.
         for (int i = 0; i < finalPattern.length(); i++) {
             char ch = finalPattern.charAt(i);
-            if (Character.isWhitespace(ch)) continue;
+            if (Character.isWhitespace(ch) || ch == '_') continue;
             if (!mapping.containsKey(ch))
                 throw new IllegalArgumentException("Pattern contains unrecognized mappings");
         }
@@ -95,7 +96,7 @@ public class MenuPattern {
     /**
      * Applies this {@link MenuPattern} to the given {@link Menu}.
      *
-     * <p>Functionally equivalent to calling {@link #apply(Menu, boolean)} with {@code ignoreEmpty} set as true.</p>
+     * <p>Functionally equivalent to calling {@link #apply(Menu, boolean)} with {@code forceEmpty} set as true.</p>
      *
      * @param menu the Menu to apply to
      */
@@ -112,6 +113,8 @@ public class MenuPattern {
      *
      * @param menu the Menu to apply to
      * @param forceEmpty if slots occupied by spaces in the pattern should be left alone
+     * @deprecated Underscores can now be used to represent slots that should forcibly be emptied. The
+     *     {@code forceEmpty} parameter has no effect.
      */
     public void apply(Menu menu, boolean forceEmpty) {
         Preconditions.checkNotNull(menu);
@@ -122,9 +125,9 @@ public class MenuPattern {
 
         for (int i = 0; i < this.pattern.length(); i++) {
             char ch = this.pattern.charAt(i);
-            if (ch == ' ') {
-                if (forceEmpty) menu.setButton(i, null);
-            } else {
+            if (ch == '_') {
+                menu.setButton(i, null);
+            } else if (ch != ' ') {
                 menu.setButton(i, this.mapping.get(ch));
             }
         }

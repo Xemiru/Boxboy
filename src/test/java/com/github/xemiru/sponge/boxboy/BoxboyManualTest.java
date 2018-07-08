@@ -68,6 +68,11 @@ public class BoxboyManualTest {
         Consumer<ClickContext> scrollContext = context ->
             Sponge.getServer().getBroadcastChannel().send(Text.of(context.getClicker().getName()));
 
+        // set a button to be replaced by a space and an underscore character to see if spaces/underscores are correctly
+        // being applied
+        menu.setButton(10, DummyButton.of(ItemStack.of(ItemTypes.STICK, 1)));
+        menu.setButton(16, DummyButton.of(ItemStack.of(ItemTypes.STICK, 1)));
+
         new MenuPattern()
             .setButton('A', DummyButton.of(ItemStack.of(ItemTypes.STAINED_GLASS_PANE, 1)))
             .setButton('B', ToggleButton.of(
@@ -82,12 +87,13 @@ public class BoxboyManualTest {
                 ActionButton.of(ItemStack.of(ItemTypes.GOLD_INGOT, 1), scrollContext),
                 ActionButton.of(ItemStack.of(ItemTypes.DIAMOND, 1), scrollContext),
                 ActionButton.of(ItemStack.of(ItemTypes.EMERALD, 1), scrollContext)))
+            .setButton('F', ActionButton.of(ItemStack.of(ItemTypes.ITEM_FRAME, 1), context -> menu.open(context.getClicker())))
             .setPattern("AAAAAAAAA",
-                "A  DBC  A",
+                "A  DBC _A",
                 "AAA E AAA",
-                "AAAAAAAAA",
-                "AAAAAAAAA",
-                "AAAACAAAA",
+                "AAA F AAA",
+                "AAA E AAA",
+                "A  DBC  A",
                 "AAAAAAAAA")
             .apply(menu);
 
