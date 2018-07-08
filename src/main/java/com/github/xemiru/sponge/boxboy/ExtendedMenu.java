@@ -46,7 +46,9 @@ public class ExtendedMenu extends Menu {
     @Override
     public void updateInventory() {
         super.updateInventory();
-        Task.builder().execute(() -> Sponge.getServer().getOnlinePlayers().forEach(this::updatePlayer));
+        Task.builder()
+            .execute(() -> Sponge.getServer().getOnlinePlayers().forEach(this::updatePlayer))
+            .submit(this.getInventory().getPlugin().getInstance().get());
     }
 
     /**
