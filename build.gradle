@@ -8,7 +8,7 @@ plugins {
 
 description 'https://github.com/Xemiru/Boxboy'
 group 'com.github.xemiru.sponge'
-version '1.0-fix1'
+version '1.0a'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
