@@ -37,7 +37,7 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Plugin;
@@ -49,13 +49,8 @@ import java.util.function.Consumer;
 @Plugin(id = "boxboy_test")
 public class BoxboyManualTest {
 
-    @Inject
-    private Game game;
-    private Boxboy boxboy;
-
     @Listener
-    public void onServerStart(GamePreInitializationEvent e) {
-        this.boxboy = new Boxboy(this, game);
+    public void onServerStart(GamePostInitializationEvent e) {
 
         // We're testing ..
         // -- each of our stock buttons and their functionality
@@ -65,7 +60,7 @@ public class BoxboyManualTest {
 
         // Use the /hhh command in-game to launch a menu.
 
-        Menu menu = boxboy.createExtendedMenu(3, Text.of("bleh"));
+        Menu menu = Boxboy.get().createExtendedMenu(3, Text.of("bleh"));
         Consumer<ClickContext> scrollContext = context ->
             Sponge.getServer().getBroadcastChannel().send(Text.of(context.getClicker().getName()));
 
@@ -75,7 +70,7 @@ public class BoxboyManualTest {
         menu.setButton(16, DummyButton.of(ItemStack.of(ItemTypes.STICK, 1)));
 
         // second menu to be opened by a button
-        Menu menu2 = boxboy.createExtendedMenu(3, Text.of("bleh2"));
+        Menu menu2 = Boxboy.get().createExtendedMenu(3, Text.of("bleh2"));
 
         menu2.setButton(0, DummyButton.of(ItemStack.of(ItemTypes.ACACIA_BOAT, 1)));
 
@@ -120,7 +115,7 @@ public class BoxboyManualTest {
         Sponge.getCommandManager().register(this, CommandSpec.builder()
             .description(Text.of("create"))
             .executor((src, args) -> {
-                if (src instanceof Player) boxboy.createMenu(3, Text.of("throwaway")).open((Player) src);
+                if (src instanceof Player) Boxboy.get().createMenu(3, Text.of("throwaway")).open((Player) src);
                 return CommandResult.success();
             })
             .build(), "create");
