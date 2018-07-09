@@ -3,11 +3,12 @@ plugins {
     id 'maven'
     id 'signing'
     id 'com.github.hierynomus.license' version '0.14.0'
+    id 'ninja.miserable.blossom' version '1.0.1'
 }
 
 description 'https://github.com/Xemiru/Boxboy'
 group 'com.github.xemiru.sponge'
-version '1.0'
+version '1.0-fix1'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -46,6 +47,11 @@ task buildTest(type: Jar) {
 }
 
 //
+
+blossom {
+    def pluginFile = 'src/main/java/com/github/xemiru/sponge/boxboy/BoxboyPlugin.java'
+    replaceToken '$VERSION$', "$project.version", pluginFile
+}
 
 license {
     header = project.file("LICENSE.txt")

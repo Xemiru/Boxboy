@@ -61,10 +61,23 @@ import java.util.UUID;
  */
 public class Boxboy {
 
+    private static Boxboy boxboy;
+
+    /**
+     * Returns the singleton instance of {@link Boxboy}.
+     *
+     * @return the singleton instance of Boxboy
+     */
+    public static Boxboy get() {
+        return Boxboy.boxboy;
+    }
+
     private Object plugin;
     private Map<UUID, ItemStack[]> playerInvs;
 
-    public Boxboy(Object plugin, Game game) {
+    Boxboy(Object plugin, Game game) {
+        Boxboy.boxboy = this;
+
         this.plugin = plugin;
         this.playerInvs = new HashMap<>();
 

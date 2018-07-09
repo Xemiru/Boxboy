@@ -4,45 +4,15 @@ Inventory library for SpongePowered plugins.
 
 # Setup
 
-This library is meant to be shaded into your plugin. This setup uses this [shadow jar plugin](http://imperceptiblethoughts.com/shadow/) to accomplish this.
+The Boxboy dependency can be simply added to the dependencies block. Maven Central should be a repository.
 
 ```gradle
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.4'
-    }
+repositories {
+    mavenCentral()
 }
 
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'java'
-```
-
-You can also use the Gradle Plugin syntax instead.
-
-```
-plugins {
-    // ..
-
-    id 'com.github.johnrengelman.shadow' version '2.0.4'
-}
-```
-
-The `shadowJar` task can then be configured. You can choose to relocate the packages to avoid version conflicts with other plugins.
-
-```gradle
-shadowJar {
-    relocate 'com.github.xemiru.sponge.boxboy', 'my.plugin.package.boxboy'
-}
-```
-
-The Boxboy dependency can be added. It must be marked non-transitive so as to disallow the plugin from pulling Boxboy's dependency on the SpongeAPI into your final jar.
-
-```
 dependencies {
-    compile('com.github.xemiru.sponge:boxboy:1.0') { transitive = false }
+    compile('com.github.xemiru.sponge:boxboy:1.0-fix1')
 }
 ```
 
@@ -124,3 +94,10 @@ Should none of these buttons cover a specific need, a custom `Button` implementa
 |getRepresentative|Returns the `ItemStack` representing the button in a `Menu`.|
 
 A button should implement either `offer` or `onClick` to have functionality.
+
+# Version History
+
+|Version|Summary|
+|:--|:--|
+|1.0|Initial release.|
+|1.0-fix1|Let's be a plugin, instead of a shaded library.|
