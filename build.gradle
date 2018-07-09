@@ -48,6 +48,9 @@ task buildTest(type: Jar) {
 
 //
 
+build.dependsOn clean
+buildTest.dependsOn clean
+
 blossom {
     def pluginFile = 'src/main/java/com/github/xemiru/sponge/boxboy/BoxboyPlugin.java'
     replaceToken '$VERSION$', "$project.version", pluginFile

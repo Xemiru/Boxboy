@@ -336,8 +336,8 @@ public class Boxboy {
         e.getCause().first(Player.class).ifPresent(leaver -> {
             if (this.hasStoredInventory(leaver)) this.restorePlayer(leaver);
             leaver.getOpenInventory().ifPresent(container -> {
-                Menu.viewerMap.remove(leaver.getUniqueId());
                 this.fromPlayer(leaver).ifPresent(menu -> menu.removeViewer(leaver));
+                Menu.viewerMap.remove(leaver.getUniqueId());
             });
         });
     }

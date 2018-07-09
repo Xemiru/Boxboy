@@ -96,7 +96,7 @@ public class MenuPattern {
     /**
      * Applies this {@link MenuPattern} to the given {@link Menu}.
      *
-     * <p>Functionally equivalent to calling {@link #apply(Menu, boolean)} with {@code forceEmpty} set as true.</p>
+     * <p>Functionally equivalent to calling {@link #apply(Menu, boolean)} with {@code ignoreEmpty} set as true.</p>
      *
      * @param menu the Menu to apply to
      */
@@ -107,16 +107,16 @@ public class MenuPattern {
     /**
      * Applies this {@link MenuPattern} to the given {@link Menu}.
      *
-     * <p>The {@code forceEmpty} parameter determines the behavior when encountering a space character in the pattern.
-     * If {@code forceEmpty} is true, the slot occupied by the space character will be cleared of its button; it is
-     * otherwise left alone.</p>
+     * <p>The {@code ignoreEmpty} parameter determines the behavior when encountering a space character in the pattern.
+     * If {@code ignoreEmpty} is true, the slot occupied by the space character will be left alone; it is otherwise
+     * cleared of its current button.</p>
      *
      * @param menu the Menu to apply to
-     * @param forceEmpty if slots occupied by spaces in the pattern should be left alone
-     * @deprecated Underscores can now be used to represent slots that should forcibly be emptied. The
-     *     {@code forceEmpty} parameter has no effect.
+     * @param ignoreEmpty if slots occupied by spaces in the pattern should be left alone
+     * @deprecated Underscores can now be used to represent slots that should forcibly be emptied. {@link #apply(Menu)}
+     *             can be used after giving the pattern underscores instead.
      */
-    public void apply(Menu menu, boolean forceEmpty) {
+    public void apply(Menu menu, boolean ignoreEmpty) {
         Preconditions.checkNotNull(menu);
 
         if (this.pattern == null) throw new IllegalStateException("Pattern has not been set");
@@ -125,7 +125,7 @@ public class MenuPattern {
 
         for (int i = 0; i < this.pattern.length(); i++) {
             char ch = this.pattern.charAt(i);
-            if (ch == '_') {
+            if (ch == '_' || (ch == ' ' && !ignoreEmpty)) {
                 menu.setButton(i, null);
             } else if (ch != ' ') {
                 menu.setButton(i, this.mapping.get(ch));
