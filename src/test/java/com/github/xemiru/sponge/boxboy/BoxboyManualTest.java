@@ -37,10 +37,11 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
+import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 
 import java.util.function.Consumer;
@@ -48,13 +49,8 @@ import java.util.function.Consumer;
 @Plugin(id = "boxboy_test")
 public class BoxboyManualTest {
 
-    @Inject
-    private Game game;
-    private Boxboy boxboy;
-
     @Listener
-    public void onServerStart(GamePreInitializationEvent e) {
-        this.boxboy = new Boxboy(this, game);
+    public void onServerStart(GamePostInitializationEvent e) {
 
         // We're testing ..
         // -- each of our stock buttons and their functionality
@@ -64,9 +60,19 @@ public class BoxboyManualTest {
 
         // Use the /hhh command in-game to launch a menu.
 
-        Menu menu = boxboy.createExtendedMenu(3, Text.of("bleh"));
+        Menu menu = Boxboy.get().createExtendedMenu(3, Text.of("bleh"));
         Consumer<ClickContext> scrollContext = context ->
             Sponge.getServer().getBroadcastChannel().send(Text.of(context.getClicker().getName()));
+
+        // set a button to be replaced by a space and an underscore character to see if spaces/underscores are correctly
+        // being applied
+        menu.setButton(10, DummyButton.of(ItemStack.of(ItemTypes.STICK, 1)));
+        menu.setButton(16, DummyButton.of(ItemStack.of(ItemTypes.STICK, 1)));
+
+        // second menu to be opened by a button
+        Menu menu2 = Boxboy.get().createExtendedMenu(3, Text.of("bleh2"));
+
+        menu2.setButton(0, DummyButton.of(ItemStack.of(ItemTypes.ACACIA_BOAT, 1)));
 
         new MenuPattern()
             .setButton('A', DummyButton.of(ItemStack.of(ItemTypes.STAINED_GLASS_PANE, 1)))
@@ -82,12 +88,19 @@ public class BoxboyManualTest {
                 ActionButton.of(ItemStack.of(ItemTypes.GOLD_INGOT, 1), scrollContext),
                 ActionButton.of(ItemStack.of(ItemTypes.DIAMOND, 1), scrollContext),
                 ActionButton.of(ItemStack.of(ItemTypes.EMERALD, 1), scrollContext)))
+            // safe menu open in the event-based implementation
+            .setButton('F', ActionButton.of(ItemStack.of(ItemTypes.ITEM_FRAME, 1), context -> Task.builder()
+                .execute(() -> menu2.open(context.getClicker()))
+                .submit(this)))
+            // unsafe menu open in the event-based implementation
+            .setButton('G', ActionButton.of(ItemStack.of(ItemTypes.SKULL, 1),
+                context -> menu2.open(context.getClicker())))
             .setPattern("AAAAAAAAA",
-                "A  DBC  A",
+                "A  DBC _A",
                 "AAA E AAA",
-                "AAAAAAAAA",
-                "AAAAAAAAA",
-                "AAAACAAAA",
+                "AA F G AA",
+                "AAA E AAA",
+                "A  DBC  A",
                 "AAAAAAAAA")
             .apply(menu);
 
@@ -100,6 +113,24 @@ public class BoxboyManualTest {
             .build(), "hhh");
 
         Sponge.getCommandManager().register(this, CommandSpec.builder()
+            .description(Text.of("create"))
+            .executor((src, args) -> {
+                if (src instanceof Player) Boxboy.get().createMenu(3, Text.of("throwaway")).open((Player) src);
+                return CommandResult.success();
+            })
+            .build(), "create");
+
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
+            .description(Text.of("manualgc"))
+            .executor((src, args) -> {
+                src.sendMessage(Text.of(String.format("There are %s menus active.", Menu.menus.size())));
+                System.gc();
+
+                src.sendMessage(Text.of(String.format("GC complete. There are %s menus active.", Menu.menus.size())));
+                return CommandResult.success();
+            }).build(), "manualgc");
+
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
             .description(Text.of("aaa"))
             .executor((src, args) -> {
                 Sponge.getServer().getOnlinePlayers().forEach(p ->
@@ -107,6 +138,14 @@ public class BoxboyManualTest {
                 return CommandResult.success();
             })
             .build(), "aaa");
+
+        Sponge.getCommandManager().register(this, CommandSpec.builder()
+            .description(Text.of("forceclose"))
+            .executor((src, args) -> {
+                Sponge.getServer().getOnlinePlayers().forEach(Player::closeInventory);
+                return CommandResult.success();
+            })
+            .build(), "forceclose");
     }
 
 }

@@ -35,9 +35,9 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
@@ -52,6 +52,7 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -86,17 +87,47 @@ public class Boxboy {
 
         // Make sure it's actually a plugin.
         // Container variable isn't used.
-        PluginContainer container = Sponge.getPluginManager().fromInstance(plugin).orElseThrow(
-            () -> new IllegalArgumentException("Provided object was not a registered Sponge plugin"));
+        @SuppressWarnings("unused") PluginContainer container = Sponge.getPluginManager().fromInstance(plugin)
+            .orElseThrow(() -> new IllegalArgumentException("Provided object was not a registered Sponge plugin"));
 
         Sponge.getEventManager().registerListeners(plugin, this);
-        Sponge.getScheduler().createTaskBuilder()
+        Task.builder()
             .name("Boxboy Menu Task (owned by " + plugin.getClass().getSimpleName() + ".class)")
             .intervalTicks(1)
-            .execute(() -> Menu.menus.forEach(menu -> {
-                if (menu.isInvalidated()) menu.updateInventory();
-            }))
-            .submit(this.plugin);
+            .execute(() -> Menu.menus.forEach(activeMenu -> {
+                Menu.openingMenu.forEach((uid, menu) ->
+                    Sponge.getServer().getPlayer(uid).filter(Player::isOnline).ifPresent(player -> {
+                        // treat this block as the open event
+                        if (menu instanceof ExtendedMenu) {
+                            if (!this.hasStoredInventory(player)) this.storePlayer(player);
+                            ((ExtendedMenu) menu).updatePlayer(player);
+                        } else if (this.hasStoredInventory(player)) this.restorePlayer(player);
+                    }));
+
+                Iterator<Map.Entry<UUID, Menu>> iter = Menu.viewerMap.entrySet().iterator();
+                while (iter.hasNext()) {
+                    Map.Entry<UUID, Menu> pair = iter.next();
+                    Optional<Player> oplayer = Sponge.getServer().getPlayer(pair.getKey()).filter(Player::isOnline);
+                    Menu menu = pair.getValue();
+
+                    if (!oplayer.isPresent()) iter.remove();
+                    oplayer.ifPresent(player -> {
+                        Optional<Container> openInv = player.getOpenInventory()
+                            .filter(it -> it.containsInventory(menu.getInventory()));
+
+                        if (!openInv.isPresent()) {
+                            // treat this block as the close event
+                            if (this.hasStoredInventory(player)) this.restorePlayer(player);
+
+                            menu.removeViewer(player);
+                            iter.remove();
+                        }
+                    });
+                }
+
+                Menu.openingMenu.clear();
+                if (activeMenu.isInvalidated()) activeMenu.updateInventory();
+            })).submit(this.plugin);
     }
 
     /**
@@ -109,6 +140,9 @@ public class Boxboy {
      * @return the Menu instance
      */
     public Menu createMenu(int rows, Text title) {
+        if (rows < 1 || rows > 6)
+            throw new IllegalArgumentException("Rows parameter must be between 1 and 6 (inclusive).");
+
         return this.createMenu(Inventory.builder()
             .of(InventoryArchetypes.CHEST)
             .property(InventoryTitle.of(title))
@@ -138,6 +172,9 @@ public class Boxboy {
      * @return the ExtendedMenu instance
      */
     public ExtendedMenu createExtendedMenu(int rows, Text title) {
+        if (rows < 1 || rows > 6)
+            throw new IllegalArgumentException("Rows parameter must be between 1 and 6 (inclusive).");
+
         return this.createPlayerMenu(Inventory.builder()
             .of(InventoryArchetypes.CHEST)
             .property(InventoryTitle.of(title))
@@ -262,6 +299,13 @@ public class Boxboy {
 
     // region Event listeners
 
+    // Both the Open and Close inventory events have no reliable way of retrieving the target player that was involved
+    // with the action. The affected player is not always present in the cause stack. Until reliability is resolved,
+    // this block is replaced with us simply tracking menu opens and closes ourselves in a less efficient manner through
+    // tracking which players get Menus opened for them and then constantly asking whether or not they still even have
+    // it open.
+
+    /*
     @Listener
     public void onOpen(InteractInventoryEvent.Open e) {
         e.getCause().first(Player.class).ifPresent(viewer ->
@@ -285,15 +329,15 @@ public class Boxboy {
 
             Menu.viewerMap.remove(viewer.getUniqueId());
         });
-    }
+    }*/
 
     @Listener
     public void onLeave(ClientConnectionEvent.Disconnect e) {
         e.getCause().first(Player.class).ifPresent(leaver -> {
             if (this.hasStoredInventory(leaver)) this.restorePlayer(leaver);
             leaver.getOpenInventory().ifPresent(container -> {
-                Menu.viewerMap.remove(leaver.getUniqueId());
                 this.fromPlayer(leaver).ifPresent(menu -> menu.removeViewer(leaver));
+                Menu.viewerMap.remove(leaver.getUniqueId());
             });
         });
     }

@@ -25,6 +25,7 @@ package com.github.xemiru.sponge.boxboy.util;
 
 import com.github.xemiru.sponge.boxboy.Menu;
 import com.github.xemiru.sponge.boxboy.button.Button;
+import com.google.common.base.Preconditions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -68,8 +69,9 @@ public class MenuPattern {
      * method as this method verifies the validity of all characters within the provided String.</p>
      *
      * <p>Each string passed to this method will be concatenated together as one pattern string. Newline characters (\r,
-     * \n) are ignored. Spaces are considered empty slots. All other characters are valid only if registered through the
-     * setButton method.</p>
+     * \n) are ignored. Spaces will do nothing to the slot at the character's position. Underscore characters (_) will
+     * forcibly remove the button in the slot at the character's position. All other characters are valid only if
+     * registered through the setButton method.</p>
      *
      * @param pattern the pattern to set
      * @return this MenuPattern, for chaining
@@ -82,7 +84,7 @@ public class MenuPattern {
         // Verify the pattern.
         for (int i = 0; i < finalPattern.length(); i++) {
             char ch = finalPattern.charAt(i);
-            if (Character.isWhitespace(ch)) continue;
+            if (Character.isWhitespace(ch) || ch == '_') continue;
             if (!mapping.containsKey(ch))
                 throw new IllegalArgumentException("Pattern contains unrecognized mappings");
         }
@@ -105,22 +107,27 @@ public class MenuPattern {
     /**
      * Applies this {@link MenuPattern} to the given {@link Menu}.
      *
-     * <p>The {@code forceEmpty} parameter determines the behavior when encountering a space character in the pattern.
-     * If {@code forceEmpty} is true, the slot occupied by the space character will be cleared of its button; it is
-     * otherwise left alone.</p>
+     * <p>The {@code ignoreEmpty} parameter determines the behavior when encountering a space character in the pattern.
+     * If {@code ignoreEmpty} is true, the slot occupied by the space character will be left alone; it is otherwise
+     * cleared of its current button.</p>
      *
      * @param menu the Menu to apply to
-     * @param forceEmpty if slots occupied by spaces in the pattern should be left alone
+     * @param ignoreEmpty if slots occupied by spaces in the pattern should be left alone
+     * @deprecated Underscores can now be used to represent slots that should forcibly be emptied. {@link #apply(Menu)}
+     *             can be used after giving the pattern underscores instead.
      */
-    public void apply(Menu menu, boolean forceEmpty) {
+    public void apply(Menu menu, boolean ignoreEmpty) {
+        Preconditions.checkNotNull(menu);
+
+        if (this.pattern == null) throw new IllegalStateException("Pattern has not been set");
         if (this.pattern.length() > menu.getCapacity())
             throw new IllegalArgumentException("Menu too small to contain pattern");
 
         for (int i = 0; i < this.pattern.length(); i++) {
             char ch = this.pattern.charAt(i);
-            if (ch == ' ') {
-                if (forceEmpty) menu.setButton(i, null);
-            } else {
+            if (ch == '_' || (ch == ' ' && !ignoreEmpty)) {
+                menu.setButton(i, null);
+            } else if (ch != ' ') {
                 menu.setButton(i, this.mapping.get(ch));
             }
         }

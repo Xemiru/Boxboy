@@ -24,11 +24,14 @@
 package com.github.xemiru.sponge.boxboy;
 
 import com.github.xemiru.sponge.boxboy.button.Button;
+import com.github.xemiru.sponge.boxboy.util.ClickContext;
+import com.github.xemiru.sponge.boxboy.util.OfferContext;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.api.scheduler.Task;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,6 +51,8 @@ public class Menu {
     static Set<Menu> menus;
     static Map<UUID, Menu> viewerMap;
 
+    static Map<UUID, Menu> openingMenu;
+
     static {
         // Use a weak set to automagically drop unused menu instances.
         // Inventories have a reference to the menus that own them through properties, thus menus should never be
@@ -55,6 +60,8 @@ public class Menu {
 
         Menu.menus = Collections.newSetFromMap(new WeakHashMap<>());
         Menu.viewerMap = new HashMap<>();
+
+        Menu.openingMenu = new HashMap<>();
     }
 
     static void updateInventory(int index, Button[] array, Inventory inv) {
@@ -167,6 +174,9 @@ public class Menu {
     /**
      * Sets a {@link Button} in this menu, or clears the one at the given index if null.
      *
+     * <p>Menu contents are updated through invalidation flags checked by a recurring scheduler task; this method is
+     * thus safe to call during inventory events.</p>
+     *
      * @param index the index to set the Button at
      * @param button the Button to set, or null to clear
      */
@@ -197,22 +207,32 @@ public class Menu {
     /**
      * Shows this {@link Menu} to the given {@link Player}.
      *
+     * <p><b>Note the sensitivity of inventory interactions when in response to inventory events.</b> If this method is
+     * to be called as part of the response to an inventory event (e.g. during the calls to
+     * {@link Button#onClick(ClickContext)} or {@link Button#offer(OfferContext)}), it should be performed on the next
+     * possible tick through the scheduler.</p>
+     *
      * @param player the Player to show this Menu to
      */
     public void open(Player player) {
         UUID uid = player.getUniqueId();
-        Menu previous = Menu.viewerMap.get(uid);
 
-        // pretend that they're already viewing it so as to validate any viewer checks in an inventory open event
-        Menu.viewerMap.put(uid, this);
-        this.viewers.add(uid);
+        // Call on the next possible tick in case we were called inside of an inventory event response
+        Task.builder().execute(() -> {
+            // pretend that they're already viewing it so as to validate any viewer checks in an inventory open event
+            Menu previous = Menu.viewerMap.get(uid);
+            Menu.viewerMap.put(uid, this);
+            Menu.openingMenu.put(uid, this);
+            this.viewers.add(uid);
 
-        if (!player.openInventory(this.inventory).isPresent()) {
-            // reverse the effects of the last two lines if the open actually failed
-            if (previous == null) Menu.viewerMap.remove(uid);
-            else Menu.viewerMap.put(uid, previous);
-            this.viewers.remove(uid);
-        }
+            if (!player.openInventory(this.inventory).isPresent()) {
+                // reverse the effects of the last two lines if the open actually failed
+                Menu.openingMenu.remove(uid);
+                if (previous == null) Menu.viewerMap.remove(uid);
+                else Menu.viewerMap.put(uid, previous);
+                this.viewers.remove(uid);
+            }
+        }).submit(this.inventory.getPlugin().getInstance().get());
     }
 
     /**

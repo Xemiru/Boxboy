@@ -25,6 +25,7 @@ package com.github.xemiru.sponge.boxboy.button;
 
 import com.github.xemiru.sponge.boxboy.util.Animation;
 import com.github.xemiru.sponge.boxboy.util.ClickContext;
+import com.google.common.base.Preconditions;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.util.function.Consumer;
@@ -52,6 +53,9 @@ public class ActionButton implements Button {
      * @return the ActionButton
      */
     public static ActionButton of(ItemStack representative, Consumer<ClickContext> action) {
+        Preconditions.checkNotNull(representative);
+        Preconditions.checkNotNull(action);
+
         ActionButton btn = new ActionButton();
         btn.representative = representative;
         btn.consumer = action;
@@ -67,6 +71,9 @@ public class ActionButton implements Button {
      * @return the ActionButton
      */
     public static ActionButton of(Animation<ItemStack> animation, Consumer<ClickContext> action) {
+        Preconditions.checkNotNull(animation);
+        Preconditions.checkNotNull(action);
+
         ActionButton btn = new ActionButton();
         btn.animation = animation;
         btn.consumer = action;

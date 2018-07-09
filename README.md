@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compile('com.github.xemiru.sponge:boxboy:1.0-fix1')
+    compile('com.github.xemiru.sponge:boxboy:1.0a')
 }
 ```
 
@@ -77,7 +77,10 @@ A button should implement either `offer` or `onClick` to have functionality.
 
 # Version History
 
+**Note that I'm an idiot, and you should really treat v1.0a as the actual v1.0.** Differences between 1.0 and 1.0a are major. Never touch anything below 1.0a.
+
 |Version|Summary|
 |:--|:--|
-|1.0|Initial release.|
+|1.0|Initial push to GitHub.|
 |1.0-fix1|Let's be a plugin, instead of a shaded library.|
+|1.0a|Major bug and stability fixes.|

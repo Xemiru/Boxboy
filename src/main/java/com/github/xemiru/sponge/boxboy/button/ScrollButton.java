@@ -61,8 +61,11 @@ public class ScrollButton implements Button {
         btn.state = defaultState;
         btn.buttons = buttons;
 
+        if (buttons.length < 3)
+            throw new IllegalArgumentException("Scroll button must have at least three state buttons (use Action or Toggle buttons instead)");
+
         if (btn.state >= buttons.length)
-            throw new IllegalArgumentException("Scroll button state out of bounds of provided button array");
+            throw new IllegalArgumentException("Scroll button default state out of bounds of provided button array");
         return btn;
     }
 
@@ -101,8 +104,8 @@ public class ScrollButton implements Button {
             if (type.isPrimary()) this.state++;
             if (type.isSecondary()) this.state--;
 
-            if(this.state >= buttons.length) this.state = 0;
-            if(this.state <= -1) this.state = buttons.length - 1;
+            if (this.state >= buttons.length) this.state = 0;
+            if (this.state <= -1) this.state = buttons.length - 1;
 
             this.getCurrentStateButton().onClick(context);
             context.getSourceMenu().invalidate();

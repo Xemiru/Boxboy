@@ -24,6 +24,7 @@
 package com.github.xemiru.sponge.boxboy.button;
 
 import com.github.xemiru.sponge.boxboy.util.ClickContext;
+import com.google.common.base.Preconditions;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 /**
@@ -68,6 +69,9 @@ public class ToggleButton implements Button {
      * @return the new ToggleButton
      */
     public static ToggleButton of(ActionButton stateA, ActionButton stateB, boolean defaultState) {
+        Preconditions.checkNotNull(stateA);
+        Preconditions.checkNotNull(stateB);
+
         ToggleButton button = new ToggleButton();
         button.state = defaultState;
         button.a = stateA;
