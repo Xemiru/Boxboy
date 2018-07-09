@@ -17,32 +17,12 @@ dependencies {
 ```
 
 # Usage
-## Setup
-
-Boxboy intends to be used as an addition to your plugin. You can create your own instance of Boxboy to access all of its functionality.
-
-Upon instantiation, Boxboy will attempt to register its tasks and events under your plugin. An error will occur if you try to instantiate Boxboy before the `GamePreinitializationEvent`.
-
-```java
-// (in your main plugin class)
-
-@Inject private Game game;
-
-private Boxboy boxboy;
-
-// ..
-
-@Listener
-public void onPreinit(GamePreinitializationEvent e) {
-    this.boxboy = new Boxboy(this, game);
-
-    // ..
-}
-```
 
 ## Creating a Menu
 
-You have two types of menus you can create through the instantiated Boxboy instance.
+In general, plugins providing an API are guaranteed to be accessible as soon as the `GamePostInitializationEvent` fires. When that event fires, the Boxboy instance can be accessed through a call to `Boxboy.get()`.
+
+You have two types of menus you can create through the singleton Boxboy instance.
 
 A `Menu` is a standard menu that only uses the top inventory and will let the player interact normally with their own inventory on the bottom of the inventory view.
 
@@ -51,10 +31,10 @@ An `ExtendedMenu` is a menu that uses both the top and bottom inventories. The v
 Both types can be created through the Boxboy instance. The top inventory can be configured to be of different sizes or different inventory types.
 
 ```java
-Menu menu = this.boxboy.createMenu(3, Text.of("title"));
-Menu extended = this.boxboy.createExtendedMenu(3, Text.of("title"));
+Menu menu = Boxboy.get().createMenu(3, Text.of("title"));
+Menu extended = Boxboy.get().createExtendedMenu(3, Text.of("title"));
 
-Menu hopper = this.boxboy.createMenu(InventoryArchetypes.HOPPER, Text.of("title"));
+Menu hopper = Boxboy.get().createMenu(InventoryArchetypes.HOPPER, Text.of("title"));
 ```
 
 ## Menu Patterns
@@ -62,7 +42,7 @@ Menu hopper = this.boxboy.createMenu(InventoryArchetypes.HOPPER, Text.of("title"
 While you can simply set the `Button`s of a `Menu` through calls to `Menu.setButton(int, Button)`, it is possible to use a `MenuPattern` instead to prepare them using templates.
 
 ```java
-Menu myMenu = this.boxboy.createMenu(3, Text.of("title"));
+Menu myMenu = Boxboy.get().createMenu(3, Text.of("title"));
 
 new MenuPattern()
     .setButton('A', DummyButton.of(ItemStack.of(ItemTypes.STAINED_GLASS_PANE, 1))
