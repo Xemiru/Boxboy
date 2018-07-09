@@ -31,6 +31,7 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.api.scheduler.Task;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,6 +51,8 @@ public class Menu {
     static Set<Menu> menus;
     static Map<UUID, Menu> viewerMap;
 
+    static Map<UUID, Menu> openingMenu;
+
     static {
         // Use a weak set to automagically drop unused menu instances.
         // Inventories have a reference to the menus that own them through properties, thus menus should never be
@@ -57,6 +60,8 @@ public class Menu {
 
         Menu.menus = Collections.newSetFromMap(new WeakHashMap<>());
         Menu.viewerMap = new HashMap<>();
+
+        Menu.openingMenu = new HashMap<>();
     }
 
     static void updateInventory(int index, Button[] array, Inventory inv) {
@@ -211,18 +216,23 @@ public class Menu {
      */
     public void open(Player player) {
         UUID uid = player.getUniqueId();
-        Menu previous = Menu.viewerMap.get(uid);
 
-        // pretend that they're already viewing it so as to validate any viewer checks in an inventory open event
-        Menu.viewerMap.put(uid, this);
-        this.viewers.add(uid);
+        // Call on the next possible tick in case we were called inside of an inventory event response
+        Task.builder().execute(() -> {
+            // pretend that they're already viewing it so as to validate any viewer checks in an inventory open event
+            Menu previous = Menu.viewerMap.get(uid);
+            Menu.viewerMap.put(uid, this);
+            Menu.openingMenu.put(uid, this);
+            this.viewers.add(uid);
 
-        if (!player.openInventory(this.inventory).isPresent()) {
-            // reverse the effects of the last two lines if the open actually failed
-            if (previous == null) Menu.viewerMap.remove(uid);
-            else Menu.viewerMap.put(uid, previous);
-            this.viewers.remove(uid);
-        }
+            if (!player.openInventory(this.inventory).isPresent()) {
+                // reverse the effects of the last two lines if the open actually failed
+                Menu.openingMenu.remove(uid);
+                if (previous == null) Menu.viewerMap.remove(uid);
+                else Menu.viewerMap.put(uid, previous);
+                this.viewers.remove(uid);
+            }
+        }).submit(this.inventory.getPlugin().getInstance().get());
     }
 
     /**
