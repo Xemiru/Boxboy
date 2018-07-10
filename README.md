@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compile('com.github.xemiru.sponge:boxboy:1.0a')
+    compile 'com.github.xemiru.sponge:boxboy:1.0b'
 }
 ```
 
@@ -84,3 +84,4 @@ A button should implement either `offer` or `onClick` to have functionality.
 |1.0|Initial push to GitHub.|
 |1.0-fix1|Let's be a plugin, instead of a shaded library.|
 |1.0a|Major bug and stability fixes.|
+|1.0b|More major stability fixes.|
