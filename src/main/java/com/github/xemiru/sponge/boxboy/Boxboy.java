@@ -28,13 +28,16 @@ import com.github.xemiru.sponge.boxboy.util.ClickContext;
 import com.github.xemiru.sponge.boxboy.util.ClickType;
 import com.github.xemiru.sponge.boxboy.util.MenuProperty;
 import com.github.xemiru.sponge.boxboy.util.OfferContext;
+import com.github.xemiru.sponge.boxboy.util.ReflectUtil;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Container;
@@ -51,11 +54,14 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.WeakHashMap;
 
 /**
  * The entrypoint class for {@link Boxboy}-related tasks.
@@ -63,6 +69,29 @@ import java.util.UUID;
 public class Boxboy {
 
     private static Boxboy boxboy;
+    private static Method m_sendAllContents, m_getInventory;
+    private static Field f_openContainer, f_inventoryContainer;
+    private static boolean reflectionReady = true;
+
+    static {
+        try {
+            Boxboy.m_sendAllContents = ReflectUtil.getDeclaredMethod("net.minecraft.entity.player.EntityPlayerMP",
+                new String[]{"sendAllContents", "func_71110_a"},
+                "net.minecraft.inventory.Container",
+                "net.minecraft.util.NonNullList");
+
+            Boxboy.m_getInventory = ReflectUtil.getDeclaredMethod("net.minecraft.inventory.Container",
+                new String[]{"getInventory", "func_75138_a"});
+
+            Boxboy.f_openContainer = ReflectUtil.getDeclaredField("net.minecraft.entity.player.EntityPlayer",
+                "openContainer", "field_71070_bA");
+
+            Boxboy.f_inventoryContainer = ReflectUtil.getDeclaredField("net.minecraft.entity.player.EntityPlayer",
+                "inventoryContainer", "field_71069_bz");
+        } catch (ClassNotFoundException | NoSuchMethodException | NoSuchFieldException ignored) {
+            Boxboy.reflectionReady = false;
+        }
+    }
 
     /**
      * Returns the singleton instance of {@link Boxboy}.
@@ -73,17 +102,39 @@ public class Boxboy {
         return Boxboy.boxboy;
     }
 
+    /**
+     * Forces a {@link Player}'s client to refresh the inventories they're viewing.
+     *
+     * @param player the Player to refresh
+     */
+    private static void updatePlayerInventory(Player player) {
+        if (!player.isOnline()) return;
+
+        try {
+            Object activeContainer = Boxboy.f_openContainer.get(player);
+            if (activeContainer == null) activeContainer = Boxboy.f_inventoryContainer.get(player);
+            Boxboy.m_sendAllContents.invoke(player, activeContainer, Boxboy.m_getInventory.invoke(activeContainer));
+        } catch (IllegalAccessException | InvocationTargetException ignored) {
+        }
+    }
+
     private Object plugin;
     private Map<UUID, ItemStack[]> playerInvs;
+    private Map<Container, UUID> containerTrack;
 
     Boxboy(Object plugin, Game game) {
         Boxboy.boxboy = this;
 
         this.plugin = plugin;
         this.playerInvs = new HashMap<>();
+        this.containerTrack = new WeakHashMap<>();
 
         if (game.getState().compareTo(GameState.PRE_INITIALIZATION) < 0)
             throw new IllegalStateException("Cannot instantiate Boxboy before pre-initialization");
+
+        if (!Boxboy.reflectionReady) {
+            throw new IllegalStateException("Boxboy's reflection failed! It can't start..");
+        }
 
         // Make sure it's actually a plugin.
         // Container variable isn't used.
@@ -94,39 +145,8 @@ public class Boxboy {
         Task.builder()
             .name("Boxboy Menu Task (owned by " + plugin.getClass().getSimpleName() + ".class)")
             .intervalTicks(1)
-            .execute(() -> Menu.menus.forEach(activeMenu -> {
-                Menu.openingMenu.forEach((uid, menu) ->
-                    Sponge.getServer().getPlayer(uid).filter(Player::isOnline).ifPresent(player -> {
-                        // treat this block as the open event
-                        if (menu instanceof ExtendedMenu) {
-                            if (!this.hasStoredInventory(player)) this.storePlayer(player);
-                            ((ExtendedMenu) menu).updatePlayer(player);
-                        } else if (this.hasStoredInventory(player)) this.restorePlayer(player);
-                    }));
-
-                Iterator<Map.Entry<UUID, Menu>> iter = Menu.viewerMap.entrySet().iterator();
-                while (iter.hasNext()) {
-                    Map.Entry<UUID, Menu> pair = iter.next();
-                    Optional<Player> oplayer = Sponge.getServer().getPlayer(pair.getKey()).filter(Player::isOnline);
-                    Menu menu = pair.getValue();
-
-                    if (!oplayer.isPresent()) iter.remove();
-                    oplayer.ifPresent(player -> {
-                        Optional<Container> openInv = player.getOpenInventory()
-                            .filter(it -> it.containsInventory(menu.getInventory()));
-
-                        if (!openInv.isPresent()) {
-                            // treat this block as the close event
-                            if (this.hasStoredInventory(player)) this.restorePlayer(player);
-
-                            menu.removeViewer(player);
-                            iter.remove();
-                        }
-                    });
-                }
-
-                Menu.openingMenu.clear();
-                if (activeMenu.isInvalidated()) activeMenu.updateInventory();
+            .execute(() -> Menu.menus.forEach(menu -> {
+                if (!menu.getViewers().isEmpty() && menu.isInvalidated()) menu.updateInventory();
             })).submit(this.plugin);
     }
 
@@ -252,7 +272,9 @@ public class Boxboy {
     }
 
     /**
-     * Restores the stored inventory of the provided {@link Player}.
+     * Internal method.
+     *
+     * <p>Restores the stored inventory of the provided {@link Player}.</p>
      *
      * @param player the Player to restore the inventory of
      * @throws IllegalStateException if the Player has no stored inventory
@@ -274,7 +296,9 @@ public class Boxboy {
     }
 
     /**
-     * Returns whether or not the given {@link Player} has a stored inventory.
+     * Internal method.
+     *
+     * <p>Returns whether or not the given {@link Player} has a stored inventory.</p>
      *
      * @param player the Player to query
      * @return if the Player has a stored inventory
@@ -295,41 +319,76 @@ public class Boxboy {
         return Optional.ofNullable(Menu.viewerMap.get(player.getUniqueId()));
     }
 
+    /**
+     * Internal method.
+     *
+     * <p>Retrieves the {@link Player} who is viewing or viewed the provided {@link Container}.</p>
+     *
+     * @param container the Container to query
+     * @return the Player viewing?
+     */
+    private Optional<Player> fromContainer(Container container) {
+        if (this.containerTrack.containsKey(container))
+            return Sponge.getServer().getPlayer(this.containerTrack.get(container)).filter(Player::isOnline);
+
+        for (Player player : Sponge.getServer().getOnlinePlayers()) {
+            if (player.getOpenInventory().orElse(null) == container) return Optional.of(player);
+        }
+
+        return Optional.empty();
+    }
+
     // endregion
 
     // region Event listeners
 
-    // Both the Open and Close inventory events have no reliable way of retrieving the target player that was involved
-    // with the action. The affected player is not always present in the cause stack. Until reliability is resolved,
-    // this block is replaced with us simply tracking menu opens and closes ourselves in a less efficient manner through
-    // tracking which players get Menus opened for them and then constantly asking whether or not they still even have
-    // it open.
+    // region container-tracking events
 
-    /*
+    @Listener(order = Order.PRE)
+    public void onOpenCT(InteractInventoryEvent.Open e) {
+        this.fromContainer(e.getTargetInventory()).map(Player::getUniqueId)
+            .ifPresent(uid -> this.containerTrack.put(e.getTargetInventory(), uid));
+    }
+
+    @Listener(order = Order.POST)
+    public void onOpenCTPost(InteractInventoryEvent.Open e) {
+        if (e.isCancelled()) this.containerTrack.remove(e.getTargetInventory());
+    }
+
+    @Listener(order = Order.POST)
+    public void onCloseCT(InteractInventoryEvent.Close e) {
+        this.containerTrack.remove(e.getTargetInventory());
+    }
+
+    // endregion
+
     @Listener
     public void onOpen(InteractInventoryEvent.Open e) {
-        e.getCause().first(Player.class).ifPresent(viewer ->
-            this.fromPlayer(viewer).ifPresent(menu -> {
+        e.getTargetInventory().getInventoryProperty(MenuProperty.class).map(MenuProperty::getValue).ifPresent(menu ->
+            this.fromContainer(e.getTargetInventory()).ifPresent(viewer -> {
+                Menu.viewerMap.put(viewer.getUniqueId(), menu);
+                menu.addViewer(viewer);
+
                 if (menu instanceof ExtendedMenu) {
-                    this.storePlayer(viewer);
-                    Task.builder().execute(() -> ((ExtendedMenu) menu).updatePlayer(viewer)).submit(this.plugin);
-                }
+                    if (!this.hasStoredInventory(viewer)) this.storePlayer(viewer);
+                    ((ExtendedMenu) menu).updatePlayer(viewer);
+                } else if (this.hasStoredInventory(viewer)) this.restorePlayer(viewer);
+
+                Task.builder().execute(() -> Boxboy.updatePlayerInventory(viewer)).submit(this.plugin);
             }));
     }
 
     @Listener
     public void onClose(InteractInventoryEvent.Close e) {
-        e.getCause().first(Player.class).ifPresent(viewer -> {
-            if (this.hasStoredInventory(viewer))
-                Task.builder().execute(() ->
-                    this.restorePlayer(viewer)).submit(this.plugin);
+        e.getTargetInventory().getInventoryProperty(MenuProperty.class).map(MenuProperty::getValue).ifPresent(menu ->
+            this.fromContainer(e.getTargetInventory()).ifPresent(viewer -> {
+                if (this.hasStoredInventory(viewer)) this.restorePlayer(viewer);
+                Task.builder().execute(() -> Boxboy.updatePlayerInventory(viewer)).submit(this.plugin);
 
-            this.fromPlayer(viewer).ifPresent(menu ->
-                menu.removeViewer(viewer));
-
-            Menu.viewerMap.remove(viewer.getUniqueId());
-        });
-    }*/
+                menu.removeViewer(viewer);
+                Menu.viewerMap.remove(viewer.getUniqueId());
+            }));
+    }
 
     @Listener
     public void onLeave(ClientConnectionEvent.Disconnect e) {

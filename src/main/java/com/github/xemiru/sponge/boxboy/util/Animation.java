@@ -67,7 +67,7 @@ public class Animation<T> {
      * @param time how long the frame is displayed, in milliseconds
      * @return this Animation, for chaining
      */
-    public Animation frame(T obj, long time) {
+    public Animation<T> frame(T obj, long time) {
         Frame frame = new Frame();
         frame.stack = obj;
         frame.time = time;
