@@ -28,10 +28,9 @@ import com.github.xemiru.sponge.boxboy.button.DummyButton;
 import com.github.xemiru.sponge.boxboy.button.ScrollButton;
 import com.github.xemiru.sponge.boxboy.button.SlotButton;
 import com.github.xemiru.sponge.boxboy.button.ToggleButton;
+import com.github.xemiru.sponge.boxboy.util.Animation;
 import com.github.xemiru.sponge.boxboy.util.ClickContext;
 import com.github.xemiru.sponge.boxboy.util.MenuPattern;
-import com.google.inject.Inject;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
@@ -75,7 +74,9 @@ public class BoxboyManualTest {
         menu2.setButton(0, DummyButton.of(ItemStack.of(ItemTypes.ACACIA_BOAT, 1)));
 
         new MenuPattern()
-            .setButton('A', DummyButton.of(ItemStack.of(ItemTypes.STAINED_GLASS_PANE, 1)))
+            .setButton('A', DummyButton.of(new Animation<ItemStack>()
+                .frame(ItemStack.of(ItemTypes.STAINED_GLASS_PANE, 1), 1000)
+                .frame(ItemStack.of(ItemTypes.WOOL, 1), 1000)))
             .setButton('B', ToggleButton.of(
                 ActionButton.of(ItemStack.of(ItemTypes.IRON_SWORD, 1), context -> Sponge.getServer().getBroadcastChannel().send(Text.of("hi"))),
                 ActionButton.of(ItemStack.of(ItemTypes.DIAMOND_SWORD, 1), context -> Sponge.getServer().getBroadcastChannel().send(Text.of("hello")))))
