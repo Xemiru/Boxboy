@@ -24,8 +24,9 @@
 package com.github.xemiru.sponge.boxboy.button;
 
 import com.github.xemiru.sponge.boxboy.util.ClickContext;
-import com.google.common.base.Preconditions;
 import org.spongepowered.api.item.inventory.ItemStack;
+
+import java.util.Objects;
 
 /**
  * A {@link Button} implementation that switches between two states defined by two provided {@link ActionButton}s.
@@ -69,8 +70,8 @@ public class ToggleButton implements Button {
      * @return the new ToggleButton
      */
     public static ToggleButton of(ActionButton stateA, ActionButton stateB, boolean defaultState) {
-        Preconditions.checkNotNull(stateA);
-        Preconditions.checkNotNull(stateB);
+        Objects.requireNonNull(stateA);
+        Objects.requireNonNull(stateB);
 
         ToggleButton button = new ToggleButton();
         button.state = defaultState;

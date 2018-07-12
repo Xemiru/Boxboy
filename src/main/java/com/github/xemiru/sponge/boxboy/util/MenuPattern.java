@@ -25,10 +25,10 @@ package com.github.xemiru.sponge.boxboy.util;
 
 import com.github.xemiru.sponge.boxboy.Menu;
 import com.github.xemiru.sponge.boxboy.button.Button;
-import com.google.common.base.Preconditions;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class MenuPattern {
 
@@ -117,7 +117,7 @@ public class MenuPattern {
      *             can be used after giving the pattern underscores instead.
      */
     public void apply(Menu menu, boolean ignoreEmpty) {
-        Preconditions.checkNotNull(menu);
+        Objects.requireNonNull(menu);
 
         if (this.pattern == null) throw new IllegalStateException("Pattern has not been set");
         if (this.pattern.length() > menu.getCapacity())
