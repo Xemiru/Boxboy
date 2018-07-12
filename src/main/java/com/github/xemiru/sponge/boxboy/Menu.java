@@ -24,6 +24,7 @@
 package com.github.xemiru.sponge.boxboy;
 
 import com.github.xemiru.sponge.boxboy.button.Button;
+import com.github.xemiru.sponge.boxboy.util.AnimatedMenuPattern;
 import com.github.xemiru.sponge.boxboy.util.ClickContext;
 import com.github.xemiru.sponge.boxboy.util.OfferContext;
 import org.spongepowered.api.entity.living.player.Player;
@@ -112,7 +113,9 @@ public class Menu {
      *
      * @param player the Player to add
      */
-    void addViewer(Player player) { this.viewers.add(player.getUniqueId()); }
+    void addViewer(Player player) {
+        this.viewers.add(player.getUniqueId());
+    }
 
     /**
      * Internal method.
@@ -244,6 +247,13 @@ public class Menu {
     public void updateInventory() {
         Menu.updateInventory(0, this.buttons, this.inventory);
         this.invalidated = false;
+    }
+
+    /**
+     * Clears this {@link Menu} of any animations applied by {@link AnimatedMenuPattern}s, if any.
+     */
+    public void clearAnimations() {
+        AnimatedMenuPattern.clearAnimation(this);
     }
 
 }

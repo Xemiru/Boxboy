@@ -48,11 +48,23 @@ public class Animation<T> {
     private long max;
     private long start;
     private List<Frame> frames;
+    private Frame pFrame, nFrame;
 
     public Animation() {
         this.max = 0;
         this.start = -1;
         this.frames = new ArrayList<>();
+        this.pFrame = null;
+        this.nFrame = null;
+    }
+
+    /**
+     * Returns whether or not this {@link Animation} has no frames.
+     *
+     * @return if this Animation has no frames
+     */
+    public boolean isEmpty() {
+        return this.frames.isEmpty();
     }
 
     /**
@@ -78,6 +90,22 @@ public class Animation<T> {
     }
 
     /**
+     * Returns whether or not the frame being currently returned by {@link #getCurrentFrame()} is different from the one
+     * it previously gave.
+     *
+     * <p>Note that each call to this method recalculates the return value, meaning calling this method twice when the
+     * frame hasn't changed will result in returning false.</p>
+     *
+     * @return whether or not {@link #getCurrentFrame()} returns a new frame
+     */
+    public boolean isNewFrame() {
+        this.pFrame = this.nFrame;
+        this.nFrame = this.findCurrent();
+
+        return this.pFrame != this.nFrame;
+    }
+
+    /**
      * Returns the object representing the current frame of this {@link Animation}.
      *
      * <p>If there are no frames registered with this helper, an {@link IllegalStateException} is thrown stating so.</p>
@@ -90,8 +118,32 @@ public class Animation<T> {
      * @return the object of the current frame
      */
     public T getCurrentFrame() {
+        return this.findCurrent().stack;
+    }
+
+    /**
+     * Returns a new {@link Animation} holding a copy of this one's frames.
+     *
+     * @return a copy of this Animation
+     */
+    public Animation<T> clone() {
+        Animation<T> anim = new Animation<>();
+        anim.max = this.max;
+        anim.frames.addAll(this.frames);
+
+        return anim;
+    }
+
+    /**
+     * Internal method.
+     *
+     * <p>Calculates the current frame.</p>
+     *
+     * @return the current frame
+     */
+    private Frame findCurrent() {
         if (this.frames.size() < 1) throw new IllegalStateException("No frames registered in animation");
-        if (this.frames.size() == 1) return this.frames.get(0).stack;
+        if (this.frames.size() == 1) return this.frames.get(0);
 
         if (this.start < 0) this.start = System.currentTimeMillis();
         long diff = (System.currentTimeMillis() - this.start) % max;
@@ -99,10 +151,10 @@ public class Animation<T> {
         long time = 0;
         for (Frame frame : this.frames) {
             time += frame.time;
-            if (diff <= time) return frame.stack;
+            if (diff <= time) return frame;
         }
 
-        return this.frames.get(this.frames.size() - 1).stack;
+        return this.frames.get(this.frames.size() - 1);
     }
 
 }
