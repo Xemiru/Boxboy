@@ -28,6 +28,7 @@ import com.github.xemiru.sponge.boxboy.button.DummyButton;
 import com.github.xemiru.sponge.boxboy.button.ScrollButton;
 import com.github.xemiru.sponge.boxboy.button.SlotButton;
 import com.github.xemiru.sponge.boxboy.button.ToggleButton;
+import com.github.xemiru.sponge.boxboy.util.AnimatedMenuPattern;
 import com.github.xemiru.sponge.boxboy.util.Animation;
 import com.github.xemiru.sponge.boxboy.util.ClickContext;
 import com.github.xemiru.sponge.boxboy.util.MenuPattern;
@@ -70,13 +71,17 @@ public class BoxboyManualTest {
 
         // second menu to be opened by a button
         Menu menu2 = Boxboy.get().createExtendedMenu(3, Text.of("bleh2"));
-
         menu2.setButton(0, DummyButton.of(ItemStack.of(ItemTypes.ACACIA_BOAT, 1)));
 
+        new AnimatedMenuPattern()
+            .setButton('A', DummyButton.of(ItemStack.of(ItemTypes.IRON_BLOCK, 1)))
+            .setButton('B', DummyButton.of(ItemStack.of(ItemTypes.GOLD_BLOCK, 1)))
+            .frame(1000, "A A A A A")
+            .frame(1000, "_B_B_B_B_")
+            .apply(menu);
+
         new MenuPattern()
-            .setButton('A', DummyButton.of(new Animation<ItemStack>()
-                .frame(ItemStack.of(ItemTypes.STAINED_GLASS_PANE, 1), 1000)
-                .frame(ItemStack.of(ItemTypes.WOOL, 1), 1000)))
+            .setButton('A', DummyButton.of(ItemStack.of(ItemTypes.STAINED_GLASS_PANE, 1)))
             .setButton('B', ToggleButton.of(
                 ActionButton.of(ItemStack.of(ItemTypes.IRON_SWORD, 1), context -> Sponge.getServer().getBroadcastChannel().send(Text.of("hi"))),
                 ActionButton.of(ItemStack.of(ItemTypes.DIAMOND_SWORD, 1), context -> Sponge.getServer().getBroadcastChannel().send(Text.of("hello")))))
