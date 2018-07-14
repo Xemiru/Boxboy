@@ -28,10 +28,12 @@ import com.github.xemiru.sponge.boxboy.button.DummyButton;
 import com.github.xemiru.sponge.boxboy.button.ScrollButton;
 import com.github.xemiru.sponge.boxboy.button.SlotButton;
 import com.github.xemiru.sponge.boxboy.button.ToggleButton;
+import com.github.xemiru.sponge.boxboy.util.AnimatedMenuPattern;
 import com.github.xemiru.sponge.boxboy.util.Animation;
 import com.github.xemiru.sponge.boxboy.util.ClickContext;
 import com.github.xemiru.sponge.boxboy.util.MenuPattern;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
@@ -70,13 +72,17 @@ public class BoxboyManualTest {
 
         // second menu to be opened by a button
         Menu menu2 = Boxboy.get().createExtendedMenu(3, Text.of("bleh2"));
-
         menu2.setButton(0, DummyButton.of(ItemStack.of(ItemTypes.ACACIA_BOAT, 1)));
 
+        new AnimatedMenuPattern()
+            .setButton('A', DummyButton.of(ItemStack.of(ItemTypes.IRON_BLOCK, 1)))
+            .setButton('B', DummyButton.of(ItemStack.of(ItemTypes.GOLD_BLOCK, 1)))
+            .frame(1000, "A A A A A")
+            .frame(1000, "_B_B_B_B_")
+            .apply(menu);
+
         new MenuPattern()
-            .setButton('A', DummyButton.of(new Animation<ItemStack>()
-                .frame(ItemStack.of(ItemTypes.STAINED_GLASS_PANE, 1), 1000)
-                .frame(ItemStack.of(ItemTypes.WOOL, 1), 1000)))
+            .setButton('A', DummyButton.of(ItemStack.of(ItemTypes.STAINED_GLASS_PANE, 1)))
             .setButton('B', ToggleButton.of(
                 ActionButton.of(ItemStack.of(ItemTypes.IRON_SWORD, 1), context -> Sponge.getServer().getBroadcastChannel().send(Text.of("hi"))),
                 ActionButton.of(ItemStack.of(ItemTypes.DIAMOND_SWORD, 1), context -> Sponge.getServer().getBroadcastChannel().send(Text.of("hello")))))
@@ -105,7 +111,8 @@ public class BoxboyManualTest {
                 "AAAAAAAAA")
             .apply(menu);
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
+        CommandManager cman = Sponge.getCommandManager();
+        cman.register(this, CommandSpec.builder()
             .description(Text.of("hhh"))
             .executor((src, args) -> {
                 if (src instanceof Player) menu.open((Player) src);
@@ -113,7 +120,7 @@ public class BoxboyManualTest {
             })
             .build(), "hhh");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
+        cman.register(this, CommandSpec.builder()
             .description(Text.of("create"))
             .executor((src, args) -> {
                 if (src instanceof Player) Boxboy.get().createMenu(3, Text.of("throwaway")).open((Player) src);
@@ -121,7 +128,7 @@ public class BoxboyManualTest {
             })
             .build(), "create");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
+        cman.register(this, CommandSpec.builder()
             .description(Text.of("manualgc"))
             .executor((src, args) -> {
                 src.sendMessage(Text.of(String.format("There are %s menus active.", Menu.menus.size())));
@@ -131,7 +138,7 @@ public class BoxboyManualTest {
                 return CommandResult.success();
             }).build(), "manualgc");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
+        cman.register(this, CommandSpec.builder()
             .description(Text.of("aaa"))
             .executor((src, args) -> {
                 Sponge.getServer().getOnlinePlayers().forEach(p ->
@@ -140,13 +147,27 @@ public class BoxboyManualTest {
             })
             .build(), "aaa");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
+        cman.register(this, CommandSpec.builder()
             .description(Text.of("forceclose"))
             .executor((src, args) -> {
                 Sponge.getServer().getOnlinePlayers().forEach(Player::closeInventory);
                 return CommandResult.success();
             })
             .build(), "forceclose");
+
+        cman.register(this, CommandSpec.builder()
+            .executor((src, args) -> {
+                menu.clearAnimations();
+                return CommandResult.success();
+            })
+            .build(), "clearanim");
+
+        cman.register(this, CommandSpec.builder()
+            .executor((src, args) -> {
+                AnimatedMenuPattern.clearAnimation(menu);
+                return CommandResult.success();
+            })
+            .build(), "clearanim2");
     }
 
 }

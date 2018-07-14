@@ -24,8 +24,9 @@
 package com.github.xemiru.sponge.boxboy.button;
 
 import com.github.xemiru.sponge.boxboy.util.Animation;
-import com.google.common.base.Preconditions;
 import org.spongepowered.api.item.inventory.ItemStack;
+
+import java.util.Objects;
 
 /**
  * A {@link Button} implementation that does absolutely nothing and thus should be used purely for aesthetical purposes.
@@ -47,7 +48,7 @@ public class DummyButton implements Button {
      * @return the DummyButton
      */
     public static DummyButton of(ItemStack representative) {
-        Preconditions.checkNotNull(representative);
+        Objects.requireNonNull(representative);
 
         DummyButton btn = new DummyButton();
         btn.representative = representative;
@@ -62,7 +63,7 @@ public class DummyButton implements Button {
      * @return the DummyButton
      */
     public static DummyButton of(Animation<ItemStack> animation) {
-        Preconditions.checkNotNull(animation);
+        Objects.requireNonNull(animation);
 
         DummyButton btn = new DummyButton();
         btn.animation = animation;

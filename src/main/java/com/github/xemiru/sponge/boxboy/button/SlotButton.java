@@ -25,11 +25,11 @@ package com.github.xemiru.sponge.boxboy.button;
 
 import com.github.xemiru.sponge.boxboy.util.ClickContext;
 import com.github.xemiru.sponge.boxboy.util.OfferContext;
-import com.google.common.base.Preconditions;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -65,7 +65,7 @@ public class SlotButton implements Button {
      * @return a new SlotButton
      */
     public static SlotButton of(Consumer<Optional<ItemStack>> processor) {
-        Preconditions.checkNotNull(processor);
+        Objects.requireNonNull(processor);
         SlotButton btn = new SlotButton();
 
         btn.held = null;

@@ -24,6 +24,7 @@
 package com.github.xemiru.sponge.boxboy;
 
 import com.github.xemiru.sponge.boxboy.button.Button;
+import com.github.xemiru.sponge.boxboy.util.AnimatedMenuPattern;
 import com.github.xemiru.sponge.boxboy.util.ClickContext;
 import com.github.xemiru.sponge.boxboy.util.ClickType;
 import com.github.xemiru.sponge.boxboy.util.MenuProperty;
@@ -147,6 +148,7 @@ public class Boxboy {
             .intervalTicks(1)
             .execute(() -> Menu.menus.forEach(menu -> {
                 if (!menu.getViewers().isEmpty() && menu.isInvalidated()) menu.updateInventory();
+                AnimatedMenuPattern.refreshAnimations();
             })).submit(this.plugin);
     }
 

@@ -25,10 +25,10 @@ package com.github.xemiru.sponge.boxboy.util;
 
 import com.github.xemiru.sponge.boxboy.Menu;
 import com.github.xemiru.sponge.boxboy.button.Button;
-import com.google.common.base.Preconditions;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.ItemStack;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -41,8 +41,8 @@ public class OfferContext {
     private ItemStack item;
 
     public OfferContext(Menu sourceMenu, Player clicker, ItemStack item) {
-        Preconditions.checkNotNull(sourceMenu);
-        Preconditions.checkNotNull(clicker);
+        Objects.requireNonNull(sourceMenu);
+        Objects.requireNonNull(clicker);
 
         this.sourceMenu = sourceMenu;
         this.clicker = clicker;

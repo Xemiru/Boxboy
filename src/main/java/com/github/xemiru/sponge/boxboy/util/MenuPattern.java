@@ -25,14 +25,17 @@ package com.github.xemiru.sponge.boxboy.util;
 
 import com.github.xemiru.sponge.boxboy.Menu;
 import com.github.xemiru.sponge.boxboy.button.Button;
-import com.google.common.base.Preconditions;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
+/**
+ * A utility class to create templates for {@link Menu}s.
+ */
 public class MenuPattern {
 
-    private Map<Character, Button> mapping;
+    Map<Character, Button> mapping;
     private String pattern;
 
     public MenuPattern() {
@@ -114,10 +117,10 @@ public class MenuPattern {
      * @param menu the Menu to apply to
      * @param ignoreEmpty if slots occupied by spaces in the pattern should be left alone
      * @deprecated Underscores can now be used to represent slots that should forcibly be emptied. {@link #apply(Menu)}
-     *             can be used after giving the pattern underscores instead.
+     *     can be used after giving the pattern underscores instead.
      */
     public void apply(Menu menu, boolean ignoreEmpty) {
-        Preconditions.checkNotNull(menu);
+        Objects.requireNonNull(menu);
 
         if (this.pattern == null) throw new IllegalStateException("Pattern has not been set");
         if (this.pattern.length() > menu.getCapacity())
