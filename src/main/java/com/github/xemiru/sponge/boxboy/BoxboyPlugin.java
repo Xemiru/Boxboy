@@ -30,7 +30,7 @@ import org.spongepowered.api.event.game.state.GamePreInitializationEvent;
 import org.spongepowered.api.plugin.Plugin;
 
 @Plugin(id = "boxboy",
-    name = "boxboy",
+    name = "Boxboy",
     version = "$VERSION$",
     description = "SpongePowered inventory menu library.",
     url = "https://github.com/Xemiru/Boxboy",
