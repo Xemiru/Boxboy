@@ -33,6 +33,7 @@ import com.github.xemiru.sponge.boxboy.util.Animation;
 import com.github.xemiru.sponge.boxboy.util.ClickContext;
 import com.github.xemiru.sponge.boxboy.util.MenuPattern;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
@@ -110,7 +111,8 @@ public class BoxboyManualTest {
                 "AAAAAAAAA")
             .apply(menu);
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
+        CommandManager cman = Sponge.getCommandManager();
+        cman.register(this, CommandSpec.builder()
             .description(Text.of("hhh"))
             .executor((src, args) -> {
                 if (src instanceof Player) menu.open((Player) src);
@@ -118,7 +120,7 @@ public class BoxboyManualTest {
             })
             .build(), "hhh");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
+        cman.register(this, CommandSpec.builder()
             .description(Text.of("create"))
             .executor((src, args) -> {
                 if (src instanceof Player) Boxboy.get().createMenu(3, Text.of("throwaway")).open((Player) src);
@@ -126,7 +128,7 @@ public class BoxboyManualTest {
             })
             .build(), "create");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
+        cman.register(this, CommandSpec.builder()
             .description(Text.of("manualgc"))
             .executor((src, args) -> {
                 src.sendMessage(Text.of(String.format("There are %s menus active.", Menu.menus.size())));
@@ -136,7 +138,7 @@ public class BoxboyManualTest {
                 return CommandResult.success();
             }).build(), "manualgc");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
+        cman.register(this, CommandSpec.builder()
             .description(Text.of("aaa"))
             .executor((src, args) -> {
                 Sponge.getServer().getOnlinePlayers().forEach(p ->
@@ -145,13 +147,27 @@ public class BoxboyManualTest {
             })
             .build(), "aaa");
 
-        Sponge.getCommandManager().register(this, CommandSpec.builder()
+        cman.register(this, CommandSpec.builder()
             .description(Text.of("forceclose"))
             .executor((src, args) -> {
                 Sponge.getServer().getOnlinePlayers().forEach(Player::closeInventory);
                 return CommandResult.success();
             })
             .build(), "forceclose");
+
+        cman.register(this, CommandSpec.builder()
+            .executor((src, args) -> {
+                menu.clearAnimations();
+                return CommandResult.success();
+            })
+            .build(), "clearanim");
+
+        cman.register(this, CommandSpec.builder()
+            .executor((src, args) -> {
+                AnimatedMenuPattern.clearAnimation(menu);
+                return CommandResult.success();
+            })
+            .build(), "clearanim2");
     }
 
 }
