@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.xemiru.sponge:boxboy:1.0b'
+    compile 'com.github.xemiru.sponge:boxboy:1.1'
 }
 ```
 
@@ -40,6 +40,8 @@ Menu hopper = Boxboy.get().createMenu(InventoryArchetypes.HOPPER, Text.of("title
 ## Menu Patterns
 
 While you can simply set the `Button`s of a `Menu` through calls to `Menu.setButton(int, Button)`, it is possible to use a `MenuPattern` instead to prepare them using templates.
+
+Spaces and the underscore character are special characters for menu patterns. Spaces will cause the pattern to ignore the button currently at the character's position, but an underscore will forcibly remove the button at the slot.
 
 ```java
 Menu myMenu = Boxboy.get().createMenu(3, Text.of("title"));
@@ -75,6 +77,27 @@ Should none of these buttons cover a specific need, a custom `Button` implementa
 
 A button should implement either `offer` or `onClick` to have functionality.
 
+# Menu Animations
+
+Instead of animating buttons, you can animate the menu itself. Menu animations can be applied through the `AnimatedMenuUtility` class, in the same way that the `MenuPattern` class is utilized. Patterns are given as frames instead, functioning similarly to when they're used with `MenuPattern`s with an additional frame length parameter provided in milliseconds.
+
+```java
+Menu myMenu = Boxboy.get().createMenu(3, Text.of("title"));
+
+new AnimatedMenuPattern()
+    .setButton('A', DummyButton.of(ItemStack.of(ItemTypes.IRON_BLOCK, 1)))
+    .setButton('B', DummyButton.of(ItemStack.of(ItemTypes.GOLD_BLOCK, 1)))
+    .frame(1000, "A_A_A_A_A",
+                 "_       _",
+                 "A_A_A_A_A")
+    .frame(1000, "_B_B_B_B_",
+                 "B       B",
+                 "_B_B_B_B_")
+    .apply(myMenu);
+```
+
+Animations can be removed with a call to `Menu.clearAnimations()`.
+
 # Version History
 
 **Note that I'm an idiot, and you should really treat v1.0a as the actual v1.0.** Differences between 1.0 and 1.0a are major. Never touch anything below 1.0a.
@@ -85,3 +108,4 @@ A button should implement either `offer` or `onClick` to have functionality.
 |1.0-fix1|Let's be a plugin, instead of a shaded library.|
 |1.0a|Major bug and stability fixes.|
 |1.0b|More major stability fixes.|
+|1.1|Menu animations.|
