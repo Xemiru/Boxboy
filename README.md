@@ -79,7 +79,7 @@ A button should implement either `offer` or `onClick` to have functionality.
 
 # Menu Animations
 
-Instead of animating buttons, you can animate the menu itself. Menu animations can be applied through the `AnimatedMenuUtility` class, in the same way that the `MenuPattern` class is utilized. Patterns are given as frames instead, functioning similarly to when they're used with `MenuPattern`s with an additional frame length parameter provided in milliseconds.
+Instead of animating buttons, you can animate the menu itself. Menu animations can be applied through the `AnimatedMenuPattern` class, in the same way that the `MenuPattern` class is utilized. Patterns are given as frames instead, functioning similarly to when they're used with `MenuPattern`s with an additional frame length parameter provided in milliseconds.
 
 ```java
 Menu myMenu = Boxboy.get().createMenu(3, Text.of("title"));
