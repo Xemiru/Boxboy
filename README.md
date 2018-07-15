@@ -68,14 +68,15 @@ There're five stock `Button` classes that Boxboy provides, all of which generall
 |Scroll|Switches between multiple states. Internally uses `Action` buttons; the button representing the state being switched to is executed.|
 |Slot|Pretends to be a functional inventory slot. Executes actions when the item in the slot is changed.|
 
-Should none of these buttons cover a specific need, a custom `Button` implementation can be written. The methods listed below are methods to be implemented (italicized methods are optional).
+Should none of these buttons cover a specific need, a custom `Button` implementation can be written. The methods listed below are methods to be implemented.
 
 |Method|Description|
 |:--|:--|
-|_isAnimated_|Return whether or not the Button is animated.|
-|_offer_|Perform an action when an item is offered to the slot by a viewing Player.|
-|_onClick_|Perform an action when the button is clicked.|
+|~~isAnimated~~|~~Return whether or not the Button is animated.~~ You can still use this for your own implementation of non-static representatives; it is otherwise recommended to implement `getAnimatedRepresentative`.|
+|offer|Perform an action when an item is offered to the slot by a viewing Player.|
+|onClick|Perform an action when the button is clicked.|
 |getRepresentative|Returns the `ItemStack` representing the button in a `Menu`.|
+|getAnimatedRepresentative|Returns an `Animation` representing animation data for the button in a `Menu`.|
 
 A button should implement either `offer` or `onClick` to have functionality.
 

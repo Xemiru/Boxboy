@@ -27,6 +27,7 @@ import com.github.xemiru.sponge.boxboy.util.Animation;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A {@link Button} implementation that does absolutely nothing and thus should be used purely for aesthetical purposes.
@@ -72,14 +73,12 @@ public class DummyButton implements Button {
     }
 
     @Override
-    public boolean isAnimated() {
-        return this.animation != null;
-    }
-
-    @Override
     public ItemStack getRepresentative() {
-        if (this.isAnimated()) return this.animation.getCurrentFrame();
         return this.representative;
     }
 
+    @Override
+    public Optional<Animation<ItemStack>> getAnimatedRepresentative() {
+        return Optional.ofNullable(this.animation);
+    }
 }

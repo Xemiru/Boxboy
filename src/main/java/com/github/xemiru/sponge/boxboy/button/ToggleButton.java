@@ -23,10 +23,12 @@
  */
 package com.github.xemiru.sponge.boxboy.button;
 
+import com.github.xemiru.sponge.boxboy.util.Animation;
 import com.github.xemiru.sponge.boxboy.util.ClickContext;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A {@link Button} implementation that switches between two states defined by two provided {@link ActionButton}s.
@@ -101,13 +103,13 @@ public class ToggleButton implements Button {
     }
 
     @Override
-    public boolean isAnimated() {
-        return this.getCurrentStateButton().isAnimated();
+    public ItemStack getRepresentative() {
+        return this.getCurrentStateButton().getRepresentative();
     }
 
     @Override
-    public ItemStack getRepresentative() {
-        return this.getCurrentStateButton().getRepresentative();
+    public Optional<Animation<ItemStack>> getAnimatedRepresentative() {
+        return this.getCurrentStateButton().getAnimatedRepresentative();
     }
 
     @Override

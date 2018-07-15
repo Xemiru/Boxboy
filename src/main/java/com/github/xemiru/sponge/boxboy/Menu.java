@@ -25,6 +25,7 @@ package com.github.xemiru.sponge.boxboy;
 
 import com.github.xemiru.sponge.boxboy.button.Button;
 import com.github.xemiru.sponge.boxboy.util.AnimatedMenuPattern;
+import com.github.xemiru.sponge.boxboy.util.Animation;
 import com.github.xemiru.sponge.boxboy.util.ClickContext;
 import com.github.xemiru.sponge.boxboy.util.OfferContext;
 import org.spongepowered.api.entity.living.player.Player;
@@ -71,9 +72,15 @@ public class Menu {
             Button btn = array[i];
             if (btn == null) {
                 if (slot.peek().filter(item -> item.getType() != ItemTypes.AIR).isPresent()) slot.clear();
-            } else if (!slot.contains(btn.getRepresentative())) {
-                slot.clear();
-                slot.set(btn.getRepresentative());
+            } else {
+                ItemStack finalRep = btn.getAnimatedRepresentative()
+                    .map(Animation::getCurrentFrame)
+                    .orElse(btn.getRepresentative());
+
+                if (!slot.contains(finalRep)) {
+                    slot.clear();
+                    slot.set(finalRep);
+                }
             }
 
             slotIndex++;
@@ -134,18 +141,28 @@ public class Menu {
      * Returns whether or not this {@link Menu} is in an invalidated state -- i.e., the menu is waiting to have its
      * representative inventory updated in the next tick to reflect changes made in the current.
      *
-     * <p>If this Menu contains any {@link Button}s that are animated ({@link Button#isAnimated()} returns true), this
-     * method will also always return true.</p>
+     * <p>If this Menu contains any {@link Button}s that are animated, this method will return based on the animation
+     * given by {@link Button#getAnimatedRepresentative()}. If an animation is present, the Menu is invalidated if
+     * {@link Animation#isNewFrame()} returns true. If no animation is present, the Menu is invalidated if
+     * {@link Button#isAnimated()} returns true. Otherwise, the Menu's own invalidation flag (which can be forced
+     * through {@link Menu#invalidate()}) is used.</p>
      *
      * @return if this Menu is in an invalidated state
      */
     public boolean isInvalidated() {
+        // check invalidation state first to not have to iterate
+        if(this.invalidated) return true;
+
+        // check for buttons waiting to change frame
         for (Button button : this.buttons) {
             if (button == null) continue;
-            if (button.isAnimated()) return true;
+            if (button.getAnimatedRepresentative()
+                .map(Animation::isNewFrame)
+                // accomodate for previous implementations of animations depending on getRepresentative return value
+                .orElse(button.isAnimated())) return true;
         }
 
-        return this.invalidated;
+        return false;
     }
 
     /**

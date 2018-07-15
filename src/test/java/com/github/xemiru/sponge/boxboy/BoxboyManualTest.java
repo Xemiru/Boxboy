@@ -32,6 +32,7 @@ import com.github.xemiru.sponge.boxboy.util.AnimatedMenuPattern;
 import com.github.xemiru.sponge.boxboy.util.Animation;
 import com.github.xemiru.sponge.boxboy.util.ClickContext;
 import com.github.xemiru.sponge.boxboy.util.MenuPattern;
+import com.github.xemiru.sponge.boxboy.util.MenuProperty;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.command.CommandResult;
@@ -82,7 +83,9 @@ public class BoxboyManualTest {
             .apply(menu);
 
         new MenuPattern()
-            .setButton('A', DummyButton.of(ItemStack.of(ItemTypes.STAINED_GLASS_PANE, 1)))
+            .setButton('A', DummyButton.of(new Animation<ItemStack>()
+                .frame(ItemStack.of(ItemTypes.APPLE, 1), 1000)
+                .frame(ItemStack.of(ItemTypes.BREAD, 1), 1000)))
             .setButton('B', ToggleButton.of(
                 ActionButton.of(ItemStack.of(ItemTypes.IRON_SWORD, 1), context -> Sponge.getServer().getBroadcastChannel().send(Text.of("hi"))),
                 ActionButton.of(ItemStack.of(ItemTypes.DIAMOND_SWORD, 1), context -> Sponge.getServer().getBroadcastChannel().send(Text.of("hello")))))
@@ -168,6 +171,16 @@ public class BoxboyManualTest {
                 return CommandResult.success();
             })
             .build(), "clearanim2");
+
+        cman.register(this, CommandSpec.builder()
+            .executor((src, args) -> {
+                Sponge.getServer().getOnlinePlayers().forEach(pl -> pl.getOpenInventory()
+                    .map(it -> it.getInventoryProperty(MenuProperty.class).map(MenuProperty::getValue).orElse(null))
+                    .ifPresent(m -> src.sendMessage(Text.of(pl.getName() + ": " + m.isInvalidated()))));
+
+                return CommandResult.success();
+            })
+            .build(), "invalidated");
     }
 
 }
