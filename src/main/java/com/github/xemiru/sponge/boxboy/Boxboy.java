@@ -36,6 +36,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
@@ -392,15 +393,22 @@ public class Boxboy {
             }));
     }
 
+    private void onLeave(Player leaver) {
+        if (this.hasStoredInventory(leaver)) this.restorePlayer(leaver);
+        leaver.getOpenInventory().ifPresent(container -> {
+            this.fromPlayer(leaver).ifPresent(menu -> menu.removeViewer(leaver));
+            Menu.viewerMap.remove(leaver.getUniqueId());
+        });
+    }
+
     @Listener
     public void onLeave(ClientConnectionEvent.Disconnect e) {
-        e.getCause().first(Player.class).ifPresent(leaver -> {
-            if (this.hasStoredInventory(leaver)) this.restorePlayer(leaver);
-            leaver.getOpenInventory().ifPresent(container -> {
-                this.fromPlayer(leaver).ifPresent(menu -> menu.removeViewer(leaver));
-                Menu.viewerMap.remove(leaver.getUniqueId());
-            });
-        });
+        e.getCause().first(Player.class).ifPresent(this::onLeave);
+    }
+
+    @Listener
+    public void onStop(GameStoppingServerEvent e) {
+        Sponge.getServer().getOnlinePlayers().forEach(this::onLeave);
     }
 
     @Listener
