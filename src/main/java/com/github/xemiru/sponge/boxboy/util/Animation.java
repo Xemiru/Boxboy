@@ -48,14 +48,13 @@ public class Animation<T> {
     private long max;
     private long start;
     private List<Frame> frames;
-    private Frame pFrame, nFrame;
+    private Frame currentFrame;
 
     public Animation() {
         this.max = 0;
         this.start = -1;
         this.frames = new ArrayList<>();
-        this.pFrame = null;
-        this.nFrame = null;
+        this.currentFrame = null;
     }
 
     /**
@@ -93,16 +92,10 @@ public class Animation<T> {
      * Returns whether or not the frame being currently returned by {@link #getCurrentFrame()} is different from the one
      * it previously gave.
      *
-     * <p>Note that each call to this method recalculates the return value, meaning calling this method twice when the
-     * frame hasn't changed will result in returning false.</p>
-     *
      * @return whether or not {@link #getCurrentFrame()} returns a new frame
      */
     public boolean isNewFrame() {
-        this.pFrame = this.nFrame;
-        this.nFrame = this.findCurrent();
-
-        return this.pFrame != this.nFrame;
+        return this.currentFrame != this.findCurrent();
     }
 
     /**
@@ -118,7 +111,8 @@ public class Animation<T> {
      * @return the object of the current frame
      */
     public T getCurrentFrame() {
-        return this.findCurrent().stack;
+        this.currentFrame = this.findCurrent();
+        return this.currentFrame.stack;
     }
 
     /**
