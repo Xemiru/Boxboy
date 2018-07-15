@@ -47,12 +47,14 @@ Spaces and the underscore character are special characters for menu patterns. Sp
 Menu myMenu = Boxboy.get().createMenu(3, Text.of("title"));
 
 new MenuPattern()
-    .setButton('A', DummyButton.of(ItemStack.of(ItemTypes.STAINED_GLASS_PANE, 1))
+    .setButton('A', DummyButton.of(ItemStack.of(ItemTypes.STAINED_GLASS_PANE, 1)))
     .setPattern("AAAAAAAAA",
                 "A       A",
                 "AAAAAAAAA")
     .apply(myMenu);
 ```
+
+![Menu](/ext/menu.png)
 
 ## Buttons
 
@@ -95,6 +97,8 @@ new AnimatedMenuPattern()
                  "_B_B_B_B_")
     .apply(myMenu);
 ```
+
+![Animated Menu](/ext/animatedMenu.gif)
 
 Animations can be removed with a call to `Menu.clearAnimations()`.
 
