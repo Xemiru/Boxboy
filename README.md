@@ -105,7 +105,7 @@ Animations can be removed with a call to `Menu.clearAnimations()`.
 
 # Version History
 
-**Note that I'm an idiot, and you should really treat v1.0a as the actual v1.0.** Differences between 1.0 and 1.0a are major. Never touch anything below 1.0a.
+Versions follow [semantic versioning](https://semver.org/), but uses letters for patch versions instead.
 
 |Version|Summary|
 |:--|:--|
@@ -114,3 +114,4 @@ Animations can be removed with a call to `Menu.clearAnimations()`.
 |1.0a|Major bug and stability fixes.|
 |1.0b|More major stability fixes.|
 |1.1|Menu animations.|
+|1.2|Improved button animations, animation efficiency and bugfixes.|
