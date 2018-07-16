@@ -80,6 +80,8 @@ Should none of these buttons cover a specific need, a custom `Button` implementa
 
 A button should implement either `offer` or `onClick` to have functionality.
 
+When implementing button functionality, one should keep the Menu's invalidation flag in mind if the button intends to make any changes to its source Menu. The Menu will not update inventories until it is marked as invalidated either by a Button's animation or by a call to `Menu.invalidate()`.
+
 # Menu Animations
 
 Instead of animating buttons, you can animate the menu itself. Menu animations can be applied through the `AnimatedMenuPattern` class, in the same way that the `MenuPattern` class is utilized. Patterns are given as frames instead, functioning similarly to when they're used with `MenuPattern`s with an additional frame length parameter provided in milliseconds.
