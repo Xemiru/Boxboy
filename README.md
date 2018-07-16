@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.xemiru.sponge:boxboy:1.1'
+    compile 'com.github.xemiru.sponge:boxboy:1.2'
 }
 ```
 
