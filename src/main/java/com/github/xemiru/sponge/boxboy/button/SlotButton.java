@@ -98,11 +98,6 @@ public class SlotButton implements Button {
     }
 
     @Override
-    public boolean isAnimated() {
-        return false;
-    }
-
-    @Override
     public ItemStack getRepresentative() {
         return this.held == null ? ItemStack.empty() : this.held;
     }

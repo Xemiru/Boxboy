@@ -28,6 +28,7 @@ import com.github.xemiru.sponge.boxboy.util.ClickContext;
 import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -82,14 +83,13 @@ public class ActionButton implements Button {
     }
 
     @Override
-    public boolean isAnimated() {
-        return this.animation != null;
+    public ItemStack getRepresentative() {
+        return this.representative;
     }
 
     @Override
-    public ItemStack getRepresentative() {
-        if (this.isAnimated()) return this.animation.getCurrentFrame();
-        return this.representative;
+    public Optional<Animation<ItemStack>> getAnimatedRepresentative() {
+        return Optional.ofNullable(this.animation);
     }
 
     @Override

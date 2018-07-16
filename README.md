@@ -47,12 +47,14 @@ Spaces and the underscore character are special characters for menu patterns. Sp
 Menu myMenu = Boxboy.get().createMenu(3, Text.of("title"));
 
 new MenuPattern()
-    .setButton('A', DummyButton.of(ItemStack.of(ItemTypes.STAINED_GLASS_PANE, 1))
+    .setButton('A', DummyButton.of(ItemStack.of(ItemTypes.STAINED_GLASS_PANE, 1)))
     .setPattern("AAAAAAAAA",
                 "A       A",
                 "AAAAAAAAA")
     .apply(myMenu);
 ```
+
+![Menu](/ext/menu.png)
 
 ## Buttons
 
@@ -66,14 +68,15 @@ There're five stock `Button` classes that Boxboy provides, all of which generall
 |Scroll|Switches between multiple states. Internally uses `Action` buttons; the button representing the state being switched to is executed.|
 |Slot|Pretends to be a functional inventory slot. Executes actions when the item in the slot is changed.|
 
-Should none of these buttons cover a specific need, a custom `Button` implementation can be written. The methods listed below are methods to be implemented (italicized methods are optional).
+Should none of these buttons cover a specific need, a custom `Button` implementation can be written. The methods listed below are methods to be implemented.
 
 |Method|Description|
 |:--|:--|
-|_isAnimated_|Return whether or not the Button is animated.|
-|_offer_|Perform an action when an item is offered to the slot by a viewing Player.|
-|_onClick_|Perform an action when the button is clicked.|
+|~~isAnimated~~|~~Return whether or not the Button is animated.~~ You can still use this for your own implementation of non-static representatives; it is otherwise recommended to implement `getAnimatedRepresentative`.|
+|offer|Perform an action when an item is offered to the slot by a viewing Player.|
+|onClick|Perform an action when the button is clicked.|
 |getRepresentative|Returns the `ItemStack` representing the button in a `Menu`.|
+|getAnimatedRepresentative|Returns an `Animation` representing animation data for the button in a `Menu`.|
 
 A button should implement either `offer` or `onClick` to have functionality.
 
@@ -96,11 +99,13 @@ new AnimatedMenuPattern()
     .apply(myMenu);
 ```
 
+![Animated Menu](/ext/animatedMenu.gif)
+
 Animations can be removed with a call to `Menu.clearAnimations()`.
 
 # Version History
 
-**Note that I'm an idiot, and you should really treat v1.0a as the actual v1.0.** Differences between 1.0 and 1.0a are major. Never touch anything below 1.0a.
+Versions follow [semantic versioning](https://semver.org/), but uses letters for patch versions instead.
 
 |Version|Summary|
 |:--|:--|
@@ -109,3 +114,4 @@ Animations can be removed with a call to `Menu.clearAnimations()`.
 |1.0a|Major bug and stability fixes.|
 |1.0b|More major stability fixes.|
 |1.1|Menu animations.|
+|1.2|Improved button animations, animation efficiency and bugfixes.|
