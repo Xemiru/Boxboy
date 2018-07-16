@@ -55,6 +55,11 @@ blossom {
     replaceToken '$VERSION$', "$project.version", pluginFile
 }
 
+javadoc {
+    options.links("https://docs.oracle.com/javase/8/docs/api/",
+                  "https://jd.spongepowered.org/7.0.0/")
+}
+
 license {
     header = project.file("LICENSE.txt")
     mapping {
