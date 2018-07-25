@@ -117,9 +117,9 @@ public class ToggleButton implements Button {
         // Swap the state.
         // We activate the action of the new state.
 
-        this.state = !state;
         if (state) a.onClick(context);
         else b.onClick(context);
+        this.state = !state;
 
         // Invalidate, as the state has changed and therefore the representative may have.
         context.getSourceMenu().invalidate();
