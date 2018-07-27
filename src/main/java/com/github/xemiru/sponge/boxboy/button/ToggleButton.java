@@ -32,29 +32,39 @@ import java.util.Optional;
 
 /**
  * A {@link Button} implementation that switches between two states defined by two provided {@link ActionButton}s.
+ *
+ * @deprecated This version of a ToggleButton was designed in a very confusing way when put to use -- the confusion
+ *             being caused by the decision to let the underlying action buttons have their action activated when
+ *             becoming the new state instead of when being changed from. As a result, this button is considered to have
+ *             "inverted" behavior. Though this button implementation remains completely functional as intended, it is
+ *             recommended to use {@link ToggledButton} instead.
  */
+@Deprecated
 public class ToggleButton implements Button {
 
-    private ActionButton a;
-    private ActionButton b;
-    private boolean state;
+    ActionButton a;
+    ActionButton b;
+    boolean state;
 
-    private ToggleButton() {
+    ToggleButton() {
         this.state = true;
         this.a = null;
         this.b = null;
     }
 
     /**
-     * Creates a new {@link ToggleButton} using the two provided state buttons.
+     * Creates a new {@link ToggleButton} using the two provided state buttons with the default state set to true.
      *
-     * <p>The state button is activated <b>when become the active state</b> -- {@code stateB}'s
-     * {@link Button#onClick(ClickContext)} will be activated first.</p>
+     * <p>The state button is activated <b>when becoming the active state</b> -- that is, when first clicked,
+     * {@code stateB}'s {@link Button#onClick(ClickContext)} will be activated.</p>
      *
      * @param stateA the true state of the ToggleButton
      * @param stateB the false state of the ToggleButton
      * @return the new ToggleButton
+     *
+     * @deprecated see {@link ToggleButton}
      */
+    @Deprecated
     public static ToggleButton of(ActionButton stateA, ActionButton stateB) {
         return ToggleButton.of(stateA, stateB, true);
     }
@@ -62,15 +72,18 @@ public class ToggleButton implements Button {
     /**
      * Creates a new {@link ToggleButton} using the two provided state buttons.
      *
-     * <p>The state button is activated <b>when becoming the active state</b> -- {@code stateB}'s
-     * {@link Button#onClick(ClickContext)} will be activated first if the default state of the ToggleButton is
-     * true.</p>
+     * <p>The state button is activated <b>when becoming the active state</b> -- that is, when first clicked,
+     * {@code stateB}'s {@link Button#onClick(ClickContext)} will be activated if the default state of the ToggleButton
+     * is true.</p>
      *
      * @param stateA the true state of the ToggleButton
      * @param stateB the false state of the ToggleButton
      * @param defaultState the default state of the ToggleButton
      * @return the new ToggleButton
+     *
+     * @deprecated see {@link ToggleButton}
      */
+    @Deprecated
     public static ToggleButton of(ActionButton stateA, ActionButton stateB, boolean defaultState) {
         Objects.requireNonNull(stateA);
         Objects.requireNonNull(stateB);
@@ -118,8 +131,7 @@ public class ToggleButton implements Button {
         // We activate the action of the new state.
 
         this.state = !state;
-        if (state) a.onClick(context);
-        else b.onClick(context);
+        this.getCurrentStateButton().onClick(context);
 
         // Invalidate, as the state has changed and therefore the representative may have.
         context.getSourceMenu().invalidate();
