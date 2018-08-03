@@ -30,43 +30,43 @@ import java.util.Objects;
 /**
  * A {@link Button} implementation that switches between two states defined by two provided {@link ActionButton}s.
  */
-public class ToggledButton extends ToggleButton {
+public class SwitchButton extends ToggleButton {
 
-    private ToggledButton() {
+    private SwitchButton() {
         super();
     }
 
     /**
-     * Creates a new {@link ToggledButton} using the two provided state buttons with the default state set to true.
+     * Creates a new {@link SwitchButton} using the two provided state buttons with the default state set to true.
      *
      * <p>The state button is activated <b>when being switched from as the active state</b> -- that is, when first
      * clicked, {@code stateA}'s {@link Button#onClick(ClickContext)} will be activated.</p>
      *
-     * @param stateA the true state of the ToggledButton
-     * @param stateB the false state of the ToggledButton
-     * @return the new ToggledButton
+     * @param stateA the true state of the SwitchButton
+     * @param stateB the false state of the SwitchButton
+     * @return the new SwitchButton
      */
-    public static ToggledButton of(ActionButton stateA, ActionButton stateB) {
-        return ToggledButton.of(stateA, stateB, true);
+    public static SwitchButton of(ActionButton stateA, ActionButton stateB) {
+        return SwitchButton.of(stateA, stateB, true);
     }
 
     /**
-     * Creates a new {@link ToggledButton} using the two provided state buttons.
+     * Creates a new {@link SwitchButton} using the two provided state buttons.
      *
      * <p>The state button is activated <b>when being switched from as the active state</b> -- that is, when first
      * clicked, {@code stateA}'s {@link Button#onClick(ClickContext)} will be activated if the default state of the
-     * ToggledButton is true.</p>
+     * SwitchButton is true.</p>
      *
-     * @param stateA the true state of the ToggledButton
-     * @param stateB the false state of the ToggledButton
-     * @param defaultState the default state of the ToggledButton
-     * @return the new ToggledButton
+     * @param stateA the true state of the SwitchButton
+     * @param stateB the false state of the SwitchButton
+     * @param defaultState the default state of the SwitchButton
+     * @return the new SwitchButton
      */
-    public static ToggledButton of(ActionButton stateA, ActionButton stateB, boolean defaultState) {
+    public static SwitchButton of(ActionButton stateA, ActionButton stateB, boolean defaultState) {
         Objects.requireNonNull(stateA);
         Objects.requireNonNull(stateB);
 
-        ToggledButton button = new ToggledButton();
+        SwitchButton button = new SwitchButton();
         button.state = defaultState;
         button.a = stateA;
         button.b = stateB;

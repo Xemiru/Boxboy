@@ -27,7 +27,7 @@ import com.github.xemiru.sponge.boxboy.button.ActionButton;
 import com.github.xemiru.sponge.boxboy.button.DummyButton;
 import com.github.xemiru.sponge.boxboy.button.ScrollButton;
 import com.github.xemiru.sponge.boxboy.button.SlotButton;
-import com.github.xemiru.sponge.boxboy.button.ToggledButton;
+import com.github.xemiru.sponge.boxboy.button.SwitchButton;
 import com.github.xemiru.sponge.boxboy.util.AnimatedMenuPattern;
 import com.github.xemiru.sponge.boxboy.util.Animation;
 import com.github.xemiru.sponge.boxboy.util.ClickContext;
@@ -86,7 +86,7 @@ public class BoxboyManualTest {
             .setButton('A', DummyButton.of(new Animation<ItemStack>()
                 .frame(ItemStack.of(ItemTypes.APPLE, 1), 1000)
                 .frame(ItemStack.of(ItemTypes.BREAD, 1), 1000)))
-            .setButton('B', ToggledButton.of(
+            .setButton('B', SwitchButton.of(
                 ActionButton.of(ItemStack.of(ItemTypes.IRON_SWORD, 1), context -> Sponge.getServer().getBroadcastChannel().send(Text.of("hi"))),
                 ActionButton.of(ItemStack.of(ItemTypes.DIAMOND_SWORD, 1), context -> Sponge.getServer().getBroadcastChannel().send(Text.of("hello")))))
             .setButton('C', SlotButton.of(it -> System.out.println(it.map(item -> item.getType().getName()).orElse("nothing"))))

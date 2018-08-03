@@ -64,7 +64,7 @@ There're five stock `Button` classes that Boxboy provides, all of which generall
 |:--|:--|
 |Dummy|Has no functionality and is purely to display an item.|
 |Action|Performs a single action when clicked.|
-|Toggled|Switches between two states. Internally uses `Action` buttons; the button representing the state being switched to is executed.|
+|Switch|Switches between two states. Internally uses `Action` buttons; the button representing the state being switched to is executed.|
 |Scroll|Switches between multiple states. Internally uses `Action` buttons; the button representing the state being switched to is executed.|
 |Slot|Pretends to be a functional inventory slot. Executes actions when the item in the slot is changed.|
 

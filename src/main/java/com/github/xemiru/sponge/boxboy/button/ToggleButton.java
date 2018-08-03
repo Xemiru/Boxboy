@@ -31,13 +31,14 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * A {@link Button} implementation that switches between two states defined by two provided {@link ActionButton}s.
+ * An (inverted) {@link Button} implementation that switches between two states defined by two provided
+ * {@link ActionButton}s.
  *
  * @deprecated This version of a ToggleButton was designed in a very confusing way when put to use -- the confusion
  *             being caused by the decision to let the underlying action buttons have their action activated when
  *             becoming the new state instead of when being changed from. As a result, this button is considered to have
  *             "inverted" behavior. Though this button implementation remains completely functional as intended, it is
- *             recommended to use {@link ToggledButton} instead.
+ *             recommended to use {@link SwitchButton} instead.
  */
 @Deprecated
 public class ToggleButton implements Button {
