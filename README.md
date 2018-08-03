@@ -16,6 +16,8 @@ dependencies {
 }
 ```
 
+Be sure to add it as a plugin dependency [in your plugin's metadata](https://docs.spongepowered.org/stable/en/plugin/plugin-meta.html).
+
 # Usage
 
 ## Creating a Menu
