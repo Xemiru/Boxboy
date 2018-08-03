@@ -16,6 +16,8 @@ dependencies {
 }
 ```
 
+Be sure to add it as a plugin dependency [in your plugin's metadata](https://docs.spongepowered.org/stable/en/plugin/plugin-meta.html).
+
 # Usage
 
 ## Creating a Menu
@@ -64,7 +66,7 @@ There're five stock `Button` classes that Boxboy provides, all of which generall
 |:--|:--|
 |Dummy|Has no functionality and is purely to display an item.|
 |Action|Performs a single action when clicked.|
-|Toggle|Switches between two states. Internally uses `Action` buttons; the button representing the state being switched to is executed.|
+|Switch|Switches between two states. Internally uses `Action` buttons; the button representing the state being switched to is executed.|
 |Scroll|Switches between multiple states. Internally uses `Action` buttons; the button representing the state being switched to is executed.|
 |Slot|Pretends to be a functional inventory slot. Executes actions when the item in the slot is changed.|
 
@@ -117,3 +119,4 @@ Versions follow [semantic versioning](https://semver.org/), but uses letters for
 |1.0b|More major stability fixes.|
 |1.1|Menu animations.|
 |1.2|Improved button animations, animation efficiency and bugfixes.|
+|1.3|Deprecation of ToggleButton in favor of SwitchButton.|
