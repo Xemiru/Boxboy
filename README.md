@@ -16,6 +16,8 @@ dependencies {
 }
 ```
 
+Be sure to add it as a plugin dependency [in your plugin's metadata](https://docs.spongepowered.org/stable/en/plugin/plugin-meta.html).
+
 # Usage
 
 ## Creating a Menu
@@ -117,3 +119,4 @@ Versions follow [semantic versioning](https://semver.org/), but uses letters for
 |1.0b|More major stability fixes.|
 |1.1|Menu animations.|
 |1.2|Improved button animations, animation efficiency and bugfixes.|
+|1.3|Deprecation of ToggleButton in favor of SwitchButton.|
