@@ -117,3 +117,4 @@ Versions follow [semantic versioning](https://semver.org/), but uses letters for
 |1.0b|More major stability fixes.|
 |1.1|Menu animations.|
 |1.2|Improved button animations, animation efficiency and bugfixes.|
+|1.3|Deprecation of ToggleButton in favor of SwitchButton.|
