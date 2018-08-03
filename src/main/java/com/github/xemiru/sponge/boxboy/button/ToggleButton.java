@@ -43,11 +43,11 @@ import java.util.Optional;
 @Deprecated
 public class ToggleButton implements Button {
 
-    ActionButton a;
-    ActionButton b;
-    boolean state;
+    private ActionButton a;
+    private ActionButton b;
+    private boolean state;
 
-    ToggleButton() {
+    private ToggleButton() {
         this.state = true;
         this.a = null;
         this.b = null;

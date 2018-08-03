@@ -23,17 +23,26 @@
  */
 package com.github.xemiru.sponge.boxboy.button;
 
+import com.github.xemiru.sponge.boxboy.util.Animation;
 import com.github.xemiru.sponge.boxboy.util.ClickContext;
+import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A {@link Button} implementation that switches between two states defined by two provided {@link ActionButton}s.
  */
-public class SwitchButton extends ToggleButton {
+public class SwitchButton implements Button {
+
+    private ActionButton a;
+    private ActionButton b;
+    private boolean state;
 
     private SwitchButton() {
-        super();
+        this.state = true;
+        this.a = null;
+        this.b = null;
     }
 
     /**
@@ -72,6 +81,35 @@ public class SwitchButton extends ToggleButton {
         button.b = stateB;
 
         return button;
+    }
+
+    /**
+     * Returns the current state of this {@link SwitchButton} as a boolean.
+     *
+     * @return the state of this SwitchButton
+     */
+    public boolean getCurrentState() {
+        return this.state;
+    }
+
+    /**
+     * Returns the {@link ActionButton} assigned to the current state of this {@link SwitchButton}.
+     *
+     * @return the representative ActionButton of this SwitchButton's current state
+     */
+    public ActionButton getCurrentStateButton() {
+        if (this.state) return a;
+        return b;
+    }
+
+    @Override
+    public ItemStack getRepresentative() {
+        return this.getCurrentStateButton().getRepresentative();
+    }
+
+    @Override
+    public Optional<Animation<ItemStack>> getAnimatedRepresentative() {
+        return this.getCurrentStateButton().getAnimatedRepresentative();
     }
 
     @Override
